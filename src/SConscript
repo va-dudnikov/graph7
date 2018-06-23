@@ -1,0 +1,14 @@
+Import("env")
+
+# Version of library
+MAJOR = 0
+MINOR = 0
+PATCH = 1
+
+VERSION = str(MAJOR) + "." + str(MINOR) + "." + str(PATCH)
+
+env["LIBS"] = ["m"]
+env["CFLAGS"] = ["-O2"]
+
+env.StaticLibrary(target = "graph7-" + VERSION, source = ["graph7.c"])
+env.SharedLibrary(target = "graph7", SHLIBVERSION = VERSION, source = ["graph7.c"])
