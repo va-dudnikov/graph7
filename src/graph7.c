@@ -339,7 +339,7 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
     if(!dst || !src || length < 2)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t out_width = 0;
+    uint32_t out_width = 1;
     uint32_t out_length = 0;
     graph7_header_t header;
 
@@ -418,8 +418,12 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
     if(width)
         *width = out_width;
 
-    return graph7_order(out_length / ((out_width) ? out_width : 1), header.gtype) > 0
-            ? out_length / ((out_width) ? out_width : 1) : -GRAPH7_INVALID_LENGTH;
+    /*
+       Дополнительная проверка, основанная на том, что если распоковалось
+       неправильное количество байт, то graph7_order вернет значение < 0
+    */
+    return graph7_order(out_length / out_width, header.gtype) > 0
+            ? out_length / out_width : -GRAPH7_INVALID_LENGTH;
 }
 
 int32_t graph7_order(uint32_t length, int32_t gtype)
@@ -427,23 +431,26 @@ int32_t graph7_order(uint32_t length, int32_t gtype)
     if(!length || gtype < 0 || gtype > GRAPH7_DIRECTED_LOOPS)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t order = ((gtype == GRAPH7_UNDIRECTED || gtype == GRAPH7_UNDIRECTED_LOOPS) ?
-                          (uint32_t)sqrt((double)(2 * length)) : (uint32_t)sqrt((double)length)) + 1;
-
+    uint32_t order;
     uint32_t test;
 
+    /* Решения простых квадратных уравнений для вычисления порядка графа */
     switch(gtype)
     {
     case GRAPH7_UNDIRECTED:
+        order = (uint32_t)(sqrt(0.25 + 2. * (double)length) + 0.5);
         test = order * (order - 1) / 2;
         break;
     case GRAPH7_UNDIRECTED_LOOPS:
+        order = (uint32_t)(sqrt(0.25 + 2. * (double)length) - 0.5);
         test = order * (order + 1) / 2;
         break;
     case GRAPH7_DIRECTED:
+        order = (uint32_t)((sqrt(1. + 4. * (double)length) + 1.) / 2.);
         test = order * (order - 1);
         break;
     case GRAPH7_DIRECTED_LOOPS:
+        order = (uint32_t)sqrt((double)length);
         test = order * order;
         break;
     }
@@ -484,16 +491,20 @@ int32_t graph7_encoding_length(uint32_t length, uint32_t width)
     return out_lenght;
 }
 
-int32_t graph7_decoding_length(const uint8_t *src, uint32_t length)
+int32_t graph7_metadata(const uint8_t *src, uint32_t length, int32_t *gtype, uint32_t *width)
 {
     if(!src || length < 2)
         return -GRAPH7_INVALID_ARG;
 
     graph7_header_t header;
     uint32_t out_length;
+    int32_t _gtype;
+    uint32_t _width = 1;
 
     if(!sextet_decode(&header.byte, &src[0], 1))
         return -GRAPH7_INVALID_HEADER;
+
+    _gtype = (int32_t)header.gtype;
 
     if(header.weighed)
     {
@@ -506,10 +517,15 @@ int32_t graph7_decoding_length(const uint8_t *src, uint32_t length)
         if(!sextet_decode(&wheader.byte, &src[1], 1))
             return -GRAPH7_INVALID_HEADER;
 
+        _width = wheader.width + 1;
+
         if(wheader.extended)
         {
             if(wheader.width > 4)
                 return -GRAPH7_INVALID_HEADER;
+
+            sextet_decode((uint8_t *)&_width, &src[hsize], wheader.width);
+            _width = width_unpack((uint8_t *)&_width, wheader.width) + 1;
             hsize += wheader.width;
         }
 
@@ -527,7 +543,187 @@ int32_t graph7_decoding_length(const uint8_t *src, uint32_t length)
         out_length += (header.tail) ? 0 : 6;
     }
 
+    if(gtype)
+        *gtype = _gtype;
+
+    if(width)
+        *width = _width;
+
     return out_length;
+}
+
+int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t order, int32_t gtype, uint32_t width)
+{
+    if(!dst || !src || order < 2)
+        return -GRAPH7_INVALID_ARG;
+
+    uint32_t length;
+    uint32_t _width = (width) ? width : 1;
+
+    switch(gtype)
+    {
+    case GRAPH7_UNDIRECTED:
+        length = order * (order - 1) / 2;
+        break;
+    case GRAPH7_UNDIRECTED_LOOPS:
+        length = order * (order + 1) / 2;
+        break;
+    case GRAPH7_DIRECTED:
+        length = order * (order - 1);
+        break;
+    case GRAPH7_DIRECTED_LOOPS:
+        length = order * order;
+        break;
+    }
+
+    uint8_t *bytearray = (uint8_t *)malloc(length * _width);
+
+    if(!bytearray)
+        return -GRAPH7_ALLOC_ERROR;
+
+    if(gtype == GRAPH7_UNDIRECTED)
+    {
+        for(uint32_t i = 0, c = 0; i < order - 1; i++)
+        {
+            for(uint32_t j = i + 1; j < order; j++, c++)
+                memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
+        }
+    }
+    else if(gtype == GRAPH7_UNDIRECTED_LOOPS)
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = i; j < order; j++, c++)
+            {
+                memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
+            }
+        }
+    }
+    else if(gtype == GRAPH7_DIRECTED)
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = 0; j < order; j++)
+            {
+                if(i == j) continue;
+                memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
+                ++c;
+            }
+        }
+    }
+    else // GRAPH7_DIRECTED_LOOPS
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = 0; j < order; j++, c++)
+                memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
+        }
+    }
+
+    if(width > 1 && endianness())
+    {
+        /*
+            Если порядок байт big-endian, то переворачиваем, так как сохраняется
+            всегда в little-endian.
+        */
+        for(uint32_t i = 0; i < length; i++)
+            reverse(&bytearray[i * _width], _width);
+    }
+
+    int32_t ret = graph7_encode(dst, bytearray, length, gtype, width);
+
+    free(bytearray);
+
+    return ret;
+}
+
+int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t length)
+{
+    if(!dst)
+        return -GRAPH7_INVALID_ARG;
+
+    int32_t gtype;
+    uint32_t width;
+    int32_t decoding_length = graph7_metadata(src, length, &gtype, &width);
+
+    if(decoding_length < 0)
+        return decoding_length;
+
+    uint8_t *bytearray = (uint8_t *)malloc(decoding_length);
+
+    if(!bytearray)
+        return -GRAPH7_ALLOC_ERROR;
+
+    int32_t ret = graph7_decode(bytearray, src, length, NULL, NULL);
+
+    if(ret * width != decoding_length)
+        goto _exit;
+
+    uint32_t order = graph7_order(ret, gtype);
+
+    if(width > 1 && endianness())
+    {
+        /*
+            Если порядок байт big-endian, то переворачиваем, так как сохраняется
+            всегда в little-endian.
+        */
+        for(uint32_t i = 0; i < decoding_length / width; i++)
+            reverse(&bytearray[i * width], width);
+    }
+
+    if(gtype == GRAPH7_UNDIRECTED)
+    {
+        for(uint32_t i = 0, c = 0; i < order - 1; i++)
+        {
+            for(uint32_t j = i + 1; j < order; j++, c++)
+            {
+                memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
+                memmove(&dst[j * order * width + i * width], &bytearray[c * width], width);
+            }
+        }
+    }
+    else if(gtype == GRAPH7_UNDIRECTED_LOOPS)
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = i; j < order; j++, c++)
+            {
+                memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
+                if(i != j)
+                    memmove(&dst[j * order * width + i * width], &bytearray[c * width], width);
+            }
+        }
+    }
+    else if(gtype == GRAPH7_DIRECTED)
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = 0; j < order; j++)
+            {
+                if(i == j) continue;
+                memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
+                ++c;
+            }
+        }
+    }
+    else // GRAPH7_DIRECTED_LOOPS
+    {
+        for(uint32_t i = 0, c = 0; i < order; i++)
+        {
+            for(uint32_t j = 0; j < order; j++, c++)
+                memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
+        }
+    }
+
+    if(gtype == GRAPH7_UNDIRECTED || gtype == GRAPH7_DIRECTED)
+    {
+        for(uint32_t i = 0; i < order; i++)
+            memset(&dst[i * order * width + i * width], 0, width);
+    }
+
+_exit:
+    free(bytearray);
+    return ret;
 }
 
 #ifdef __cplusplus
