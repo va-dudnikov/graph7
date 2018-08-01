@@ -69,7 +69,7 @@ static uint8_t decoding_table[128] =
     Check endianess
     return: 0 - little-endian, 1 - big-endian
 */
-static inline uint8_t endianness()
+static inline uint8_t endianness(void)
 {
     uint32_t x = 1;
     return (((uint8_t *)&x)[0]) ? 0 : 1;
@@ -572,7 +572,7 @@ int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t ord
     case GRAPH7_DIRECTED:
         length = order * (order - 1);
         break;
-    case GRAPH7_DIRECTED_LOOPS:
+    default:
         length = order * order;
         break;
     }
