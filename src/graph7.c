@@ -6,6 +6,8 @@
 //==============================================================================
 // PRIVATE
 
+#define BUFFER_SIZE 256
+
 typedef union graph7_header
 {
     struct
@@ -383,33 +385,32 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
         if(header.tail > 5)
             return -GRAPH7_INVALID_HEADER;
 
-        const uint32_t buffer_size = 256;
         const uint8_t *new_src = &src[1];
         uint32_t new_length = length - 1;
-        uint32_t c = new_length / buffer_size;
-        uint32_t t = new_length % buffer_size;
-        uint8_t buffer[buffer_size];
+        uint32_t c = new_length / BUFFER_SIZE;
+        uint32_t t = new_length % BUFFER_SIZE;
+        uint8_t buffer[BUFFER_SIZE];
 
         if(!t)
         {
             c -= 1;
-            t = buffer_size;
+            t = BUFFER_SIZE;
         }
 
         uint32_t i;
 
         for(i = 0; i < c; i++)
         {
-            if(!sextet_decode(&buffer[0], &new_src[i * buffer_size], buffer_size))
+            if(!sextet_decode(&buffer[0], &new_src[i * BUFFER_SIZE], BUFFER_SIZE))
                 return -GRAPH7_INVALID_DATA;
 
-            out_length += sextet_unpack(&dst[i * 6 * buffer_size], &buffer[0], buffer_size, 0);
+            out_length += sextet_unpack(&dst[i * 6 * BUFFER_SIZE], &buffer[0], BUFFER_SIZE, 0);
         }
 
-        if(!sextet_decode(&buffer[0], &new_src[i * buffer_size], t))
+        if(!sextet_decode(&buffer[0], &new_src[i * BUFFER_SIZE], t))
             return -GRAPH7_INVALID_DATA;
 
-        out_length += sextet_unpack(&dst[i * 6 * buffer_size], &buffer[0], t, header.tail);
+        out_length += sextet_unpack(&dst[i * 6 * BUFFER_SIZE], &buffer[0], t, header.tail);
     }
 
     if(gtype)
