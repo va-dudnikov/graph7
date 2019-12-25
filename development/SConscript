@@ -1,0 +1,8 @@
+Import('env')
+
+env['CPPPATH'] = ['../include']
+env['LIBPATH'] = ['../src']
+env['LIBS'] = ['graph7-%s' % env['VERSION']]
+env['CFLAGS'] = ['-g']
+
+env.Program(target='main.exe', source=['main.c'])

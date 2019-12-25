@@ -1,2 +1,12 @@
 build/*
 .sconsign.dblite
+graph7.cflags
+graph7.config
+graph7.cxxflags
+graph7.files
+graph7.includes
+graph7.creator*
+*.o
+*.a
+*.dll
+*.so

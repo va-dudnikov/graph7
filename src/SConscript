@@ -1,14 +1,12 @@
-Import("env")
+Import('env')
 
-# Version of library
-MAJOR = 0
-MINOR = 0
-PATCH = 1
+env['LIBS'] = ['m']
+#env['CFLAGS'] = ['-O2']
 
-VERSION = str(MAJOR) + "." + str(MINOR) + "." + str(PATCH)
+source = [
+    'graph7.c',
+    'csv_parser.c',
+]
 
-env["LIBS"] = ["m"]
-env["CFLAGS"] = ["-O2"]
-
-env.StaticLibrary(target = "graph7-" + VERSION, source = ["graph7.c"])
-env.SharedLibrary(target = "graph7", SHLIBVERSION = VERSION, source = ["graph7.c"])
+env.StaticLibrary(target='graph7-%s' % env['VERSION'], source=source)
+#env.SharedLibrary(target = 'graph7', SHLIBVERSION = env['VERSION', source = ['graph7.c'])
