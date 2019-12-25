@@ -1,5 +1,5 @@
-#include "def.h"
-#include "csv_parser.h"
+#include <graph7/def.h>
+#include <graph7/csv_parser.h>
 
 #include <string.h>
 

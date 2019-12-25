@@ -1,4 +1,4 @@
-#include "graph7.h"
+#include <graph7/graph7.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>

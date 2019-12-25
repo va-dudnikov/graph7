@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <graph7.h>
-#include <csv_parser.h>
+#include <graph7/graph7.h>
+#include <graph7/csv_parser.h>
 
 static const char *matrix = "0, 1, 0, 0, \n"
                             "1, 0, 1, 1, \n"
