@@ -8,6 +8,12 @@
 
 #define BUFFER_SIZE 256
 
+#define BITMASK_2 0x03
+#define BITMASK_3 0x07
+#define BITMASK_4 0x0F
+#define BITMASK_6 0x3f
+#define BITMASK_7 0x7f
+
 typedef union graph7_header
 {
     struct
@@ -78,9 +84,9 @@ static inline uint8_t endianness(void)
 /*
     Reverse bytearray
 */
-static inline void reverse(uint8_t *src, uint32_t length)
+static inline void reverse(uint8_t *src, size_t length)
 {
-    uint32_t i;
+    size_t i;
 
     for(i = 0; i < length / 2; i++)
     {
@@ -90,11 +96,11 @@ static inline void reverse(uint8_t *src, uint32_t length)
     }
 }
 
-static inline uint32_t sextet_pack(uint8_t *dst, const uint8_t *src, uint32_t length, uint8_t *tail)
+static inline size_t sextet_pack(uint8_t *dst, const uint8_t *src, size_t length, uint8_t *tail)
 {
     uint8_t t = length % 6;
-    uint32_t c = length / 6;
-    uint32_t i, j, k;
+    size_t c = length / 6;
+    size_t i, j, k;
 
     memset(dst, 0, (t ? c + 1 : c));
 
@@ -113,10 +119,10 @@ static inline uint32_t sextet_pack(uint8_t *dst, const uint8_t *src, uint32_t le
     return (t ? c + 1 : c);
 }
 
-static inline uint32_t sextet_unpack(uint8_t *dst, const uint8_t *src, uint32_t length, uint8_t tail)
+static inline size_t sextet_unpack(uint8_t *dst, const uint8_t *src, size_t length, uint8_t tail)
 {
-    uint32_t c = (tail) ? length - 1 : length;
-    uint32_t i, j, k;
+    size_t c = (tail) ? length - 1 : length;
+    size_t i, j, k;
 
     for(i = 0, k = 0; i < c; i++)
     {
@@ -130,9 +136,9 @@ static inline uint32_t sextet_unpack(uint8_t *dst, const uint8_t *src, uint32_t 
     return k;
 }
 
-static inline uint8_t width_pack(uint8_t *dst, uint32_t width)
+static inline uint8_t width_pack(uint8_t *dst, size_t width)
 {
-    uint32_t new_width = width;
+    size_t new_width = width;
     uint8_t c;
 
     if(new_width < 64) c = 1;
@@ -142,52 +148,53 @@ static inline uint8_t width_pack(uint8_t *dst, uint32_t width)
     else return 0;
 
     if(endianness())
-        reverse((uint8_t *)&new_width, sizeof(uint32_t));
+        reverse((uint8_t *)&new_width, sizeof(size_t));
 
-    if(c > 0) dst[0] = new_width & 0b00111111;
-    if(c > 1) dst[1] = (new_width >> 6) & 0b00111111;
-    if(c > 2) dst[2] = (new_width >> 12) & 0b00111111;
-    if(c > 3) dst[3] = (new_width >> 18) & 0b00111111;
+    if(c > 0) dst[0] = new_width & BITMASK_6;
+    if(c > 1) dst[1] = (new_width >> 6) & BITMASK_6;
+    if(c > 2) dst[2] = (new_width >> 12) & BITMASK_6;
+    if(c > 3) dst[3] = (new_width >> 18) & BITMASK_6;
 
     return c;
 }
 
-static inline uint32_t width_unpack(const uint8_t *src, uint8_t c)
+static inline size_t width_unpack(const uint8_t *src, uint8_t c)
 {
-    uint32_t new_width = 0;
+    size_t new_width = 0;
 
+    // TODO заменить на цикл, зачем я вообще так сделал?
     if(c > 0)
         new_width |= src[0];
     if(c > 1)
-        new_width |= src[1] << 6;
+        new_width |= (size_t)(src[1] << 6);
     if(c > 2)
-        new_width |= src[2] << 12;
+        new_width |= (size_t)(src[2] << 12);
     if(c > 3)
-        new_width |= src[3] << 18;
+        new_width |= (size_t)(src[3] << 18);
 
     if(endianness())
-        reverse((uint8_t *)&new_width, sizeof(uint32_t));
+        reverse((uint8_t *)&new_width, sizeof(size_t));
 
     return new_width;
 }
 
-static inline uint32_t sextet_encode(uint8_t *dst, const uint8_t *src, uint32_t length)
+static inline size_t sextet_encode(uint8_t *dst, const uint8_t *src, size_t length)
 {
-    uint32_t i;
+    size_t i;
 
     for(i = 0; i < length; i++)
-        dst[i] = encoding_table[src[i] & 0b00111111];
+        dst[i] = encoding_table[src[i] & BITMASK_6];
 
     return length;
 }
 
-static inline uint32_t sextet_decode(uint8_t *dst, const uint8_t *src, uint32_t length)
+static inline size_t sextet_decode(uint8_t *dst, const uint8_t *src, size_t length)
 {
-    uint32_t i;
+    size_t i;
 
     for(i = 0; i < length; i++)
     {
-        dst[i] = decoding_table[src[i] & 0b01111111];
+        dst[i] = decoding_table[src[i] & BITMASK_7];
         if(dst[i] == 0xff)
             return 0;
     }
@@ -195,9 +202,9 @@ static inline uint32_t sextet_decode(uint8_t *dst, const uint8_t *src, uint32_t 
     return length;
 }
 
-static inline uint32_t bytearray_encode(uint8_t *dst, const uint8_t *src, uint32_t length, uint8_t *out_tail)
+static inline size_t bytearray_encode(uint8_t *dst, const uint8_t *src, size_t length, uint8_t *out_tail)
 {
-    uint32_t i, j;
+    size_t i, j;
     uint8_t tail;
 
     for(i = j = 0; i < length; i++)
@@ -206,16 +213,16 @@ static inline uint32_t bytearray_encode(uint8_t *dst, const uint8_t *src, uint32
 
         if(tail == 0)
         {
-            dst[j++] = encoding_table[(src[i] >> 2) & 0b00111111];
+            dst[j++] = encoding_table[(src[i] >> 2) & BITMASK_6];
         }
         else if(tail == 1)
         {
-            dst[j++] = encoding_table[((src[i - 1] & 0b0000011) << 4) | ((src[i] >> 4) & 0b00001111)];
+            dst[j++] = encoding_table[((src[i - 1] & BITMASK_2) << 4) | ((src[i] >> 4) & BITMASK_4)];
         }
         else
         {
-            dst[j++] = encoding_table[((src[i - 1] & 0b00001111) << 2) | ((src[i] >> 6) & 0b00000011)];
-            dst[j++] = encoding_table[src[i] & 0b00111111];
+            dst[j++] = encoding_table[((src[i - 1] & BITMASK_4) << 2) | ((src[i] >> 6) & BITMASK_2)];
+            dst[j++] = encoding_table[src[i] & BITMASK_6];
         }
     }
 
@@ -223,12 +230,12 @@ static inline uint32_t bytearray_encode(uint8_t *dst, const uint8_t *src, uint32
 
     if(i % 3 == 0)
     {
-        dst[j++] = encoding_table[(src[i] & 0b00000011) << 4];
+        dst[j++] = encoding_table[(src[i] & BITMASK_2) << 4];
         *out_tail = 2;
     }
     else if(i % 3 == 1)
     {
-        dst[j++] = encoding_table[(src[i] & 0b00001111) << 2];
+        dst[j++] = encoding_table[(src[i] & BITMASK_4) << 2];
         *out_tail = 1;
     }
     else
@@ -239,15 +246,15 @@ static inline uint32_t bytearray_encode(uint8_t *dst, const uint8_t *src, uint32
     return j;
 }
 
-static inline uint32_t bytearray_decode(uint8_t *dst, const uint8_t *src, uint32_t length, uint8_t in_tail)
+static inline size_t bytearray_decode(uint8_t *dst, const uint8_t *src, size_t length, uint8_t in_tail)
 {
-    uint32_t i, j;
+    size_t i, j;
     uint8_t tail, byte;
 
     for(i = j = 0; i < length; i++)
     {
         tail = i % 4;
-        byte = decoding_table[src[i] & 0b01111111];
+        byte = decoding_table[src[i] & BITMASK_7];
 
         if(byte == 0xff)
             return 0;
@@ -268,7 +275,7 @@ static inline uint32_t bytearray_decode(uint8_t *dst, const uint8_t *src, uint32
             dst[j++] |= byte >> 2;
 
             if(i < length - 1 || !in_tail)
-                dst[j] = (byte << 6) & 0b11000000;
+                dst[j] = (byte << 6) & 0xc0;
         }
         else
         {
@@ -286,14 +293,14 @@ static inline uint32_t bytearray_decode(uint8_t *dst, const uint8_t *src, uint32
 extern "C" {
 #endif
 
-int32_t graph7_encode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t gtype, uint32_t width)
+ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t gtype, size_t width)
 {
     if(!dst || !src || graph7_order(length, gtype) <= 0)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t k = length * (width ? width : 1);
-    uint32_t hsize = 1;
-    uint32_t out_length;
+    size_t k = length * (width ? width : 1);
+    size_t hsize = 1;
+    size_t out_length;
     uint8_t tail;
 
     graph7_header_t *header = (graph7_header_t *)&dst[0];
@@ -336,13 +343,13 @@ int32_t graph7_encode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
     return out_length + hsize;
 }
 
-int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t *gtype, uint32_t *width)
+ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *gtype, size_t *width)
 {
     if(!dst || !src || length < 2)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t out_width = 1;
-    uint32_t out_length = 0;
+    size_t out_width = 1;
+    size_t out_length = 0;
     graph7_header_t header;
 
     if(!sextet_decode(&header.byte, &src[0], 1))
@@ -350,7 +357,7 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
 
     if(header.weighed)
     {
-        uint32_t hsize = 2;
+        size_t hsize = 2;
         graph7_wheader_t wheader;
 
         if(header.tail > 2)
@@ -386,9 +393,9 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
             return -GRAPH7_INVALID_HEADER;
 
         const uint8_t *new_src = &src[1];
-        uint32_t new_length = length - 1;
-        uint32_t c = new_length / BUFFER_SIZE;
-        uint32_t t = new_length % BUFFER_SIZE;
+        size_t new_length = length - 1;
+        size_t c = new_length / BUFFER_SIZE;
+        size_t t = new_length % BUFFER_SIZE;
         uint8_t buffer[BUFFER_SIZE];
 
         if(!t)
@@ -397,7 +404,7 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
             t = BUFFER_SIZE;
         }
 
-        uint32_t i;
+        size_t i;
 
         for(i = 0; i < c; i++)
         {
@@ -427,31 +434,31 @@ int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t
             ? out_length / out_width : -GRAPH7_INVALID_LENGTH;
 }
 
-int32_t graph7_order(uint32_t length, int32_t gtype)
+ssize_t graph7_order(size_t length, int32_t gtype)
 {
     if(!length || gtype < 0 || gtype > GRAPH7_DIRECTED_LOOPS)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t order;
-    uint32_t test;
+    size_t order;
+    size_t test;
 
     /* Решения простых квадратных уравнений для вычисления порядка графа */
     switch(gtype)
     {
     case GRAPH7_UNDIRECTED:
-        order = (uint32_t)(sqrt(0.25 + 2. * (double)length) + 0.5);
+        order = (size_t)(sqrt(0.25 + 2. * (double)length) + 0.5);
         test = order * (order - 1) / 2;
         break;
     case GRAPH7_UNDIRECTED_LOOPS:
-        order = (uint32_t)(sqrt(0.25 + 2. * (double)length) - 0.5);
+        order = (size_t)(sqrt(0.25 + 2. * (double)length) - 0.5);
         test = order * (order + 1) / 2;
         break;
     case GRAPH7_DIRECTED:
-        order = (uint32_t)((sqrt(1. + 4. * (double)length) + 1.) / 2.);
+        order = (size_t)((sqrt(1. + 4. * (double)length) + 1.) / 2.);
         test = order * (order - 1);
         break;
     case GRAPH7_DIRECTED_LOOPS:
-        order = (uint32_t)sqrt((double)length);
+        order = (size_t)sqrt((double)length);
         test = order * order;
         break;
     }
@@ -459,18 +466,18 @@ int32_t graph7_order(uint32_t length, int32_t gtype)
     return (test == length) ? order : -GRAPH7_INVALID_LENGTH;
 }
 
-int32_t graph7_encoding_length(uint32_t length, uint32_t width)
+ssize_t graph7_encoding_length(size_t length, size_t width)
 {
     if(!length)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t k = length * (width ? width : 1);
-    uint32_t out_lenght = 1;
+    size_t k = length * (width ? width : 1);
+    size_t out_lenght = 1;
 
     if(width)
     {
         out_lenght += 1;
-        uint32_t new_width = width - 1;
+        size_t new_width = width - 1;
 
         if(new_width >= 32)
         {
@@ -492,15 +499,15 @@ int32_t graph7_encoding_length(uint32_t length, uint32_t width)
     return out_lenght;
 }
 
-int32_t graph7_metadata(const uint8_t *src, uint32_t length, int32_t *gtype, uint32_t *width)
+ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_t *width)
 {
     if(!src || length < 2)
         return -GRAPH7_INVALID_ARG;
 
     graph7_header_t header;
-    uint32_t out_length;
+    size_t out_length;
     int32_t _gtype;
-    uint32_t _width = 1;
+    size_t _width = 1;
 
     if(!sextet_decode(&header.byte, &src[0], 1))
         return -GRAPH7_INVALID_HEADER;
@@ -509,7 +516,7 @@ int32_t graph7_metadata(const uint8_t *src, uint32_t length, int32_t *gtype, uin
 
     if(header.weighed)
     {
-        uint32_t hsize = 2;
+        size_t hsize = 2;
         graph7_wheader_t wheader;
 
         if(header.tail > 2)
@@ -553,13 +560,13 @@ int32_t graph7_metadata(const uint8_t *src, uint32_t length, int32_t *gtype, uin
     return out_length;
 }
 
-int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t order, int32_t gtype, uint32_t width)
+ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, int32_t gtype, size_t width)
 {
     if(!dst || !src || order < 2)
         return -GRAPH7_INVALID_ARG;
 
-    uint32_t length;
-    uint32_t _width = (width) ? width : 1;
+    size_t length;
+    size_t _width = (width) ? width : 1;
 
     switch(gtype)
     {
@@ -584,17 +591,17 @@ int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t ord
 
     if(gtype == GRAPH7_UNDIRECTED)
     {
-        for(uint32_t i = 0, c = 0; i < order - 1; i++)
+        for(size_t i = 0, c = 0; i < order - 1; i++)
         {
-            for(uint32_t j = i + 1; j < order; j++, c++)
+            for(size_t j = i + 1; j < order; j++, c++)
                 memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
         }
     }
     else if(gtype == GRAPH7_UNDIRECTED_LOOPS)
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = i; j < order; j++, c++)
+            for(size_t j = i; j < order; j++, c++)
             {
                 memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
             }
@@ -602,9 +609,9 @@ int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t ord
     }
     else if(gtype == GRAPH7_DIRECTED)
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = 0; j < order; j++)
+            for(size_t j = 0; j < order; j++)
             {
                 if(i == j) continue;
                 memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
@@ -614,9 +621,9 @@ int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t ord
     }
     else // GRAPH7_DIRECTED_LOOPS
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = 0; j < order; j++, c++)
+            for(size_t j = 0; j < order; j++, c++)
                 memmove(&bytearray[c * _width], &src[i * order * _width + j * _width], _width);
         }
     }
@@ -627,24 +634,24 @@ int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t ord
             Если порядок байт big-endian, то переворачиваем, так как сохраняется
             всегда в little-endian.
         */
-        for(uint32_t i = 0; i < length; i++)
+        for(size_t i = 0; i < length; i++)
             reverse(&bytearray[i * _width], _width);
     }
 
-    int32_t ret = graph7_encode(dst, bytearray, length, gtype, width);
+    ssize_t ret = graph7_encode(dst, bytearray, length, gtype, width);
 
     free(bytearray);
 
     return ret;
 }
 
-int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t length)
+ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 {
     if(!dst)
         return -GRAPH7_INVALID_ARG;
 
     int32_t gtype;
-    uint32_t width;
+    size_t width;
     int32_t decoding_length = graph7_metadata(src, length, &gtype, &width);
 
     if(decoding_length < 0)
@@ -660,7 +667,7 @@ int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t lengt
     if(ret * width != decoding_length)
         goto _exit;
 
-    uint32_t order = graph7_order(ret, gtype);
+    size_t order = graph7_order(ret, gtype);
 
     if(width > 1 && endianness())
     {
@@ -668,15 +675,15 @@ int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t lengt
             Если порядок байт big-endian, то переворачиваем, так как сохраняется
             всегда в little-endian.
         */
-        for(uint32_t i = 0; i < decoding_length / width; i++)
+        for(size_t i = 0; i < decoding_length / width; i++)
             reverse(&bytearray[i * width], width);
     }
 
     if(gtype == GRAPH7_UNDIRECTED)
     {
-        for(uint32_t i = 0, c = 0; i < order - 1; i++)
+        for(size_t i = 0, c = 0; i < order - 1; i++)
         {
-            for(uint32_t j = i + 1; j < order; j++, c++)
+            for(size_t j = i + 1; j < order; j++, c++)
             {
                 memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
                 memmove(&dst[j * order * width + i * width], &bytearray[c * width], width);
@@ -685,9 +692,9 @@ int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t lengt
     }
     else if(gtype == GRAPH7_UNDIRECTED_LOOPS)
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = i; j < order; j++, c++)
+            for(size_t j = i; j < order; j++, c++)
             {
                 memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
                 if(i != j)
@@ -697,9 +704,9 @@ int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t lengt
     }
     else if(gtype == GRAPH7_DIRECTED)
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = 0; j < order; j++)
+            for(size_t j = 0; j < order; j++)
             {
                 if(i == j) continue;
                 memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
@@ -709,16 +716,16 @@ int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t lengt
     }
     else // GRAPH7_DIRECTED_LOOPS
     {
-        for(uint32_t i = 0, c = 0; i < order; i++)
+        for(size_t i = 0, c = 0; i < order; i++)
         {
-            for(uint32_t j = 0; j < order; j++, c++)
+            for(size_t j = 0; j < order; j++, c++)
                 memmove(&dst[i * order * width + j * width], &bytearray[c * width], width);
         }
     }
 
     if(gtype == GRAPH7_UNDIRECTED || gtype == GRAPH7_DIRECTED)
     {
-        for(uint32_t i = 0; i < order; i++)
+        for(size_t i = 0; i < order; i++)
             memset(&dst[i * order * width + i * width], 0, width);
     }
 

@@ -1,87 +1,84 @@
+/*!
+ * \file
+ */
+
 #ifndef GRAPH7_H
 #define GRAPH7_H
 
-#include "def.h"
+#include <graph7/def.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
-    Encoding adjacency matrix to graph7
-    dst[out]: destination
-    src[in]: source
-    length[in]: number of cells in adjacency matrix
-    gtype[in]: type of graph (see types of graphs)
-    width[in]: number of bytes in cell (if need encoding as 1 byte = 1 bit, width must be set 0)
+/*!
+ * \brief Encoding adjacency matrix to graph7
+ * \param dst[out] Destination
+ * \param src[in] Source
+ * \param length[in] Number of cells in adjacency matrix
+ * \param gtype[in] Type of graph (see Types of graphs)
+ * \param width[in] Number of bytes in cell (if need encoding as 1 byte = 1 bit, width must be set 0)
+ * \return Number of characters if ok, < 0 otherwise
+ */
+ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t gtype, size_t width);
 
-    return: number of characters if ok, < 0 otherwise
-*/
-int32_t graph7_encode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t gtype, uint32_t width);
+/*!
+ * \brief Decoding graph7 to adjacency matrix
+ * \param dst[out] Destination
+ * \param src[in] Source
+ * \param length[in] Number of characters
+ * \param gtype[out] Pointer to variable, where will be stored type of graph
+ * \param width[out] Pointer to variable, where will be stored width of cells
+ * \return Number of cells in adjacency matrix if ok, < 0 otherwise
+ */
+ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *gtype, size_t *width);
 
-/*
-    Decoding graph7 to adjacency matrix
-    dst[out]: destination
-    src[in]: source
-    length[in]: number of characters
-    gtype[out]: pointer to variable, where will be stored type of graph
-    width[out]: pointer to variable, where will be stored width of cells
+/*!
+ * \brief Convert number of cells in adjacency matrix to order of graph
+ * \param length[in] Number of cells in adjacency matrix
+ * \param gtype[in] Type of graph
+ * \return Order of graph if ok, < 0 otherwise
+ */
+ssize_t graph7_order(size_t length, int32_t gtype);
 
-    return: number of cells in adjacency matrix if ok, < 0 otherwise
-*/
-int32_t graph7_decode(uint8_t *dst, const uint8_t *src, uint32_t length, int32_t *gtype, uint32_t *width);
+/*!
+ * \brief Get number of bytes for encoding
+ * \param length[in] Number of cells in adjacency matrix
+ * \param width[in] Number of bytes in cell
+ * \return Number of bytes if ok, < 0 otherwise
+ */
+ssize_t graph7_encoding_length(size_t length, size_t width);
 
-/*
-    Convert number of cells in adjacency matrix to order of graph
-    length[in]: number of cells in adjacency matrix
-    gtype[in]: type of graph
+/*!
+ * \brief Get metadata
+ * \param src[in] Source
+ * \param length[in] Number of characters
+ * \param gtype[out] Type of graph
+ * \param width[out] Number of bytes in cell
+ * \return Decoding length if ok, < 0 otherwise
+ */
+ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_t *width);
 
-    return: order of graph if ok, < 0 otherwise
-*/
-int32_t graph7_order(uint32_t length, int32_t gtype);
+/*!
+ * \brief Encoding graph7 from matrix
+ * \param dst[out] Destination
+ * \param src[in] Source (matrix order * order in 1D array)
+ * \param order[in] Order of graph
+ * \param gtype[in] Type of graph
+ * \param width[in] Number of bytes in cell
+ * \return The same as graph7_encode
+ */
+ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, int32_t gtype, size_t width);
 
-/*
-    Get number of bytes for encoding
-    length[in]: number of cells in adjacency matrix
-    width[in]: number of bytes in cell
-
-    return: number of bytes if ok, < 0 otherwise
-*/
-int32_t graph7_encoding_length(uint32_t length, uint32_t width);
-
-/*
-    Get metadata
-    src[in]: source
-    length[in]: number of characters
-    gtype[out]: type of graph
-    width[out]: number of bytes in cell
-
-    return: decoding length if ok, < 0 otherwise
-*/
-int32_t graph7_metadata(const uint8_t *src, uint32_t length, int32_t *gtype, uint32_t *width);
-
-/*
-    Encoding graph7 from matrix
-    dst[out]: destination
-    src[in]: source (matrix order * order in 1D array)
-    order[in]: order of graph
-    gtype[in]: type of graph
-    width[in]: number of bytes in cell
-
-    return: the same as graph7_encode
-*/
-int32_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, uint32_t order, int32_t gtype, uint32_t width);
-
-/*
-    Decoding graph7 to matrix
-    dst[out]: destination (matrix order * order in 1D array)
-    src[in]: source
-    length[in]: number of characters
-
-    return: the same as graph7_decode
-*/
-int32_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, uint32_t length);
+/*!
+ * \brief Decoding graph7 to matrix
+ * \param dst[out] Destination (matrix order * order in 1D array)
+ * \param src[in] Source
+ * \param length[in] Number of characters
+ * \return the same as graph7_decode
+ */
+ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length);
 
 #ifdef __cplusplus
 }

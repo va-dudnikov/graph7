@@ -13,4 +13,4 @@ VERSION = '{major}.{minor}.{patch}'.format(major=MAJOR, minor=MINOR, patch=PATCH
 env['VERSION'] = VERSION
 
 SConscript('src/SConscript', exports=['env'])
-SConscript('development/SConscript', exports=['env'])
+SConscript('examples/SConscript', exports=['env'])
