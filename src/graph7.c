@@ -6,38 +6,13 @@
 //==============================================================================
 // PRIVATE
 
-#define BUFFER_SIZE 256
-
+#define BITMASK_1 0x01
 #define BITMASK_2 0x03
 #define BITMASK_3 0x07
 #define BITMASK_4 0x0F
-#define BITMASK_6 0x3f
-#define BITMASK_7 0x7f
-
-typedef union graph7_header
-{
-    struct
-    {
-        uint8_t weighed     :1;
-        uint8_t gtype       :2;
-        uint8_t tail        :3;
-        uint8_t reserved    :2;
-    };
-
-    uint8_t byte;
-} graph7_header_t;
-
-typedef union graph7_wheader
-{
-    struct
-    {
-        uint8_t extended        :1;
-        uint8_t width           :5;
-        uint8_t reserved        :2;
-    };
-
-    uint8_t byte;
-} graph7_wheader_t;
+#define BITMASK_5 0x1F
+#define BITMASK_6 0x3F
+#define BITMASK_7 0x7F
 
 static uint8_t encoding_table[64] =
 {
@@ -293,7 +268,7 @@ static inline size_t bytearray_decode(uint8_t *dst, const uint8_t *src, size_t l
 extern "C" {
 #endif
 
-ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t gtype, size_t width)
+ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gtype_t gtype, size_t width)
 {
     if(!dst || !src || graph7_order(length, gtype) <= 0)
         return -GRAPH7_INVALID_ARG;
@@ -343,7 +318,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t g
     return out_length + hsize;
 }
 
-ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *gtype, size_t *width)
+ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width)
 {
     if(!dst || !src || length < 2)
         return -GRAPH7_INVALID_ARG;
@@ -394,30 +369,30 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *
 
         const uint8_t *new_src = &src[1];
         size_t new_length = length - 1;
-        size_t c = new_length / BUFFER_SIZE;
-        size_t t = new_length % BUFFER_SIZE;
-        uint8_t buffer[BUFFER_SIZE];
+        size_t c = new_length / GRAPH7_BUFFER_SIZE;
+        size_t t = new_length % GRAPH7_BUFFER_SIZE;
+        uint8_t buffer[GRAPH7_BUFFER_SIZE];
 
         if(!t)
         {
             c -= 1;
-            t = BUFFER_SIZE;
+            t = GRAPH7_BUFFER_SIZE;
         }
 
         size_t i;
 
         for(i = 0; i < c; i++)
         {
-            if(!sextet_decode(&buffer[0], &new_src[i * BUFFER_SIZE], BUFFER_SIZE))
+            if(!sextet_decode(&buffer[0], &new_src[i * GRAPH7_BUFFER_SIZE], GRAPH7_BUFFER_SIZE))
                 return -GRAPH7_INVALID_DATA;
 
-            out_length += sextet_unpack(&dst[i * 6 * BUFFER_SIZE], &buffer[0], BUFFER_SIZE, 0);
+            out_length += sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], GRAPH7_BUFFER_SIZE, 0);
         }
 
-        if(!sextet_decode(&buffer[0], &new_src[i * BUFFER_SIZE], t))
+        if(!sextet_decode(&buffer[0], &new_src[i * GRAPH7_BUFFER_SIZE], t))
             return -GRAPH7_INVALID_DATA;
 
-        out_length += sextet_unpack(&dst[i * 6 * BUFFER_SIZE], &buffer[0], t, header.tail);
+        out_length += sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], t, header.tail);
     }
 
     if(gtype)
@@ -434,9 +409,9 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *
             ? out_length / out_width : -GRAPH7_INVALID_LENGTH;
 }
 
-ssize_t graph7_order(size_t length, int32_t gtype)
+ssize_t graph7_order(size_t length, graph7_gtype_t gtype)
 {
-    if(!length || gtype < 0 || gtype > GRAPH7_DIRECTED_LOOPS)
+    if(!length || gtype > GRAPH7_DIRECTED_LOOPS)
         return -GRAPH7_INVALID_ARG;
 
     size_t order;
@@ -499,20 +474,20 @@ ssize_t graph7_encoding_length(size_t length, size_t width)
     return out_lenght;
 }
 
-ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_t *width)
+ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width)
 {
     if(!src || length < 2)
         return -GRAPH7_INVALID_ARG;
 
     graph7_header_t header;
     size_t out_length;
-    int32_t _gtype;
+    graph7_gtype_t _gtype;
     size_t _width = 1;
 
     if(!sextet_decode(&header.byte, &src[0], 1))
         return -GRAPH7_INVALID_HEADER;
 
-    _gtype = (int32_t)header.gtype;
+    _gtype = (graph7_gtype_t)header.gtype;
 
     if(header.weighed)
     {
@@ -560,7 +535,7 @@ ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_
     return out_length;
 }
 
-ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, int32_t gtype, size_t width)
+ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, graph7_gtype_t gtype, size_t width)
 {
     if(!dst || !src || order < 2)
         return -GRAPH7_INVALID_ARG;
@@ -650,9 +625,9 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     if(!dst)
         return -GRAPH7_INVALID_ARG;
 
-    int32_t gtype;
+    graph7_gtype_t gtype;
     size_t width;
-    int32_t decoding_length = graph7_metadata(src, length, &gtype, &width);
+    ssize_t decoding_length = graph7_metadata(src, length, &gtype, &width);
 
     if(decoding_length < 0)
         return decoding_length;
@@ -662,7 +637,7 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     if(!bytearray)
         return -GRAPH7_ALLOC_ERROR;
 
-    int32_t ret = graph7_decode(bytearray, src, length, NULL, NULL);
+    ssize_t ret = graph7_decode(bytearray, src, length, NULL, NULL);
 
     if(ret * width != decoding_length)
         goto _exit;

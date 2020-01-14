@@ -6,7 +6,6 @@
 #define GRAPH7_H
 
 #include <graph7/def.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +20,7 @@ extern "C" {
  * \param width[in] Number of bytes in cell (if need encoding as 1 byte = 1 bit, width must be set 0)
  * \return Number of characters if ok, < 0 otherwise
  */
-ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t gtype, size_t width);
+ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gtype_t gtype, size_t width);
 
 /*!
  * \brief Decoding graph7 to adjacency matrix
@@ -32,7 +31,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, int32_t g
  * \param width[out] Pointer to variable, where will be stored width of cells
  * \return Number of cells in adjacency matrix if ok, < 0 otherwise
  */
-ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *gtype, size_t *width);
+ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width);
 
 /*!
  * \brief Convert number of cells in adjacency matrix to order of graph
@@ -40,7 +39,7 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, int32_t *
  * \param gtype[in] Type of graph
  * \return Order of graph if ok, < 0 otherwise
  */
-ssize_t graph7_order(size_t length, int32_t gtype);
+ssize_t graph7_order(size_t length, graph7_gtype_t gtype);
 
 /*!
  * \brief Get number of bytes for encoding
@@ -58,7 +57,7 @@ ssize_t graph7_encoding_length(size_t length, size_t width);
  * \param width[out] Number of bytes in cell
  * \return Decoding length if ok, < 0 otherwise
  */
-ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_t *width);
+ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width);
 
 /*!
  * \brief Encoding graph7 from matrix
@@ -69,7 +68,7 @@ ssize_t graph7_metadata(const uint8_t *src, size_t length, int32_t *gtype, size_
  * \param width[in] Number of bytes in cell
  * \return The same as graph7_encode
  */
-ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, int32_t gtype, size_t width);
+ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, graph7_gtype_t gtype, size_t width);
 
 /*!
  * \brief Decoding graph7 to matrix
