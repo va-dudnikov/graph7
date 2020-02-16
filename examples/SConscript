@@ -5,4 +5,4 @@ env['LIBPATH'] = ['../src']
 env['LIBS'] = ['graph7-%s' % env['VERSION']]
 env['CFLAGS'] = ['-g']
 
-env.Program(target='example1.exe', source=['example1.c'])
+env.Program(target='example1', source=['example1.c'])

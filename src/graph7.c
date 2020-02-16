@@ -279,7 +279,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
     uint8_t tail;
 
     graph7_header_t *header = (graph7_header_t *)&dst[0];
-    header->byte = 0;
+    dst[0] = 0; // Clear header
     header->gtype = gtype;
 
     if(width)
@@ -287,7 +287,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
         hsize += 1;
         header->weighed = 1;
         graph7_wheader_t *wheader = (graph7_wheader_t *)&dst[1];
-        wheader->byte = 0;
+        dst[1] = 0; // Clear header
 
         if(width > 32)
         {
@@ -327,7 +327,7 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
     size_t out_length = 0;
     graph7_header_t header;
 
-    if(!sextet_decode(&header.byte, &src[0], 1))
+    if(!sextet_decode((uint8_t *)&header, &src[0], 1))
         return -GRAPH7_INVALID_HEADER;
 
     if(header.weighed)
@@ -338,7 +338,7 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
         if(header.tail > 2)
             return -GRAPH7_INVALID_HEADER;
 
-        if(!sextet_decode(&wheader.byte, &src[1], 1))
+        if(!sextet_decode((uint8_t *)&wheader, &src[1], 1))
             return -GRAPH7_INVALID_HEADER;
 
         if(wheader.extended)
@@ -433,7 +433,7 @@ ssize_t graph7_order(size_t length, graph7_gtype_t gtype)
         test = order * (order - 1);
         break;
     case GRAPH7_DIRECTED_LOOPS:
-        order = (size_t)sqrt((double)length);
+        order = (size_t)(sqrt((double)length));
         test = order * order;
         break;
     }
@@ -484,7 +484,7 @@ ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype
     graph7_gtype_t _gtype;
     size_t _width = 1;
 
-    if(!sextet_decode(&header.byte, &src[0], 1))
+    if(!sextet_decode((uint8_t *)&header, &src[0], 1))
         return -GRAPH7_INVALID_HEADER;
 
     _gtype = (graph7_gtype_t)header.gtype;
@@ -497,7 +497,7 @@ ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype
         if(header.tail > 2)
             return -GRAPH7_INVALID_HEADER;
 
-        if(!sextet_decode(&wheader.byte, &src[1], 1))
+        if(!sextet_decode((uint8_t *)&wheader, &src[1], 1))
             return -GRAPH7_INVALID_HEADER;
 
         _width = wheader.width + 1;
@@ -627,6 +627,7 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 
     graph7_gtype_t gtype;
     size_t width;
+    ssize_t order;
     ssize_t decoding_length = graph7_metadata(src, length, &gtype, &width);
 
     if(decoding_length < 0)
@@ -637,12 +638,15 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     if(!bytearray)
         return -GRAPH7_ALLOC_ERROR;
 
-    ssize_t ret = graph7_decode(bytearray, src, length, NULL, NULL);
+    ssize_t check = graph7_decode(bytearray, src, length, NULL, NULL);
 
-    if(ret * width != decoding_length)
+    if(check * width != decoding_length)
+    {
+        check = -GRAPH7_INVALID_ARG;
         goto _exit;
+    }
 
-    size_t order = graph7_order(ret, gtype);
+    order = graph7_order(check, gtype);
 
     if(width > 1 && endianness())
     {
@@ -706,7 +710,7 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 
 _exit:
     free(bytearray);
-    return ret;
+    return check > 0 ? order : check;
 }
 
 #ifdef __cplusplus

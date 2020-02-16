@@ -75,7 +75,7 @@ ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order
  * \param dst[out] Destination (matrix order * order in 1D array)
  * \param src[in] Source
  * \param length[in] Number of characters
- * \return the same as graph7_decode
+ * \return order of graph
  */
 ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length);
 

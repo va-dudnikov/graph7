@@ -2,12 +2,11 @@ Import('env')
 
 env['CPPPATH'] = ['../include']
 env['LIBS'] = ['m']
-#env['CFLAGS'] = ['-O2']
+env['CFLAGS'] = ['-O2']
 
 source = [
     'graph7.c',
-    'csvparser.c',
 ]
 
 env.StaticLibrary(target='graph7-%s' % env['VERSION'], source=source)
-#env.SharedLibrary(target = 'graph7', SHLIBVERSION = env['VERSION', source = ['graph7.c'])
+env.SharedLibrary(target = 'graph7', source=source)
