@@ -236,14 +236,14 @@ static inline size_t bytearray_decode(uint8_t *dst, const uint8_t *src, size_t l
 
         if(tail == 0)
         {
-            dst[j] = byte << 2;
+            dst[j] = (uint8_t)(byte << 2);
         }
         else if(tail == 1)
         {
             dst[j++] |= (byte >> 4);
 
             if(i < length - 1 || !in_tail)
-                dst[j] = byte << 4;
+                dst[j] = (uint8_t)(byte << 4);
         }
         else if(tail == 2)
         {
@@ -315,7 +315,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
     header->tail = tail;
     sextet_encode(&dst[0], &dst[0], hsize);
 
-    return out_length + hsize;
+    return (ssize_t)(out_length + hsize);
 }
 
 ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width)
@@ -414,8 +414,8 @@ ssize_t graph7_order(size_t length, graph7_gtype_t gtype)
     if(!length || gtype > GRAPH7_DIRECTED_LOOPS)
         return -GRAPH7_INVALID_ARG;
 
-    size_t order;
-    size_t test;
+    size_t order = 0;
+    size_t test = 0;
 
     /* Решения простых квадратных уравнений для вычисления порядка графа */
     switch(gtype)
@@ -438,7 +438,7 @@ ssize_t graph7_order(size_t length, graph7_gtype_t gtype)
         break;
     }
 
-    return (test == length) ? order : -GRAPH7_INVALID_LENGTH;
+    return (test == length) ? (ssize_t)order : -GRAPH7_INVALID_LENGTH;
 }
 
 ssize_t graph7_encoding_length(size_t length, size_t width)
@@ -471,7 +471,7 @@ ssize_t graph7_encoding_length(size_t length, size_t width)
         out_lenght += (k % 6 != 0 ? 1 : 0);
     }
 
-    return out_lenght;
+    return (ssize_t)out_lenght;
 }
 
 ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width)
@@ -532,7 +532,7 @@ ssize_t graph7_metadata(const uint8_t *src, size_t length, graph7_gtype_t *gtype
     if(width)
         *width = _width;
 
-    return out_length;
+    return (ssize_t)out_length;
 }
 
 ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, graph7_gtype_t gtype, size_t width)
@@ -626,27 +626,35 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
         return -GRAPH7_INVALID_ARG;
 
     graph7_gtype_t gtype;
+    ssize_t check;
     size_t width;
-    ssize_t order;
-    ssize_t decoding_length = graph7_metadata(src, length, &gtype, &width);
+    size_t order = 0;
+    size_t decoding_length = (size_t)graph7_metadata(src, length, &gtype, &width);
 
-    if(decoding_length < 0)
-        return decoding_length;
+    if((ssize_t)decoding_length < 0)
+        return (ssize_t)decoding_length;
 
     uint8_t *bytearray = (uint8_t *)malloc(decoding_length);
 
     if(!bytearray)
         return -GRAPH7_ALLOC_ERROR;
 
-    ssize_t check = graph7_decode(bytearray, src, length, NULL, NULL);
+    check = graph7_decode(bytearray, src, length, NULL, NULL);
 
-    if(check * width != decoding_length)
+    if(check < 0)
+        goto _exit;
+
+    if((size_t)check * width != decoding_length)
     {
         check = -GRAPH7_INVALID_ARG;
         goto _exit;
     }
 
-    order = graph7_order(check, gtype);
+    /*
+        Не проверяем значение переменной, так как значение всегда будет > 0 на
+        этом этапе.
+     */
+    order = (size_t)graph7_order((size_t)check, gtype);
 
     if(width > 1 && endianness())
     {
@@ -710,7 +718,7 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 
 _exit:
     free(bytearray);
-    return check > 0 ? order : check;
+    return check > 0 ? (ssize_t)order : check;
 }
 
 #ifdef __cplusplus
