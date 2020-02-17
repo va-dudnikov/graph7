@@ -8,6 +8,12 @@
 #include <graph7/errno.h>
 #include <stdint.h>
 
+// MSVC haven't ssize_t
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 /*!
  * \name Types of graphs
  * Types of graphs for encoding/decoding.
