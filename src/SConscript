@@ -1,6 +1,5 @@
 Import('env')
 
-env['CPPPATH'] = ['../include']
 env['LIBS'] = ['m']
 env['CFLAGS'] = ['-O2']
 
@@ -8,5 +7,5 @@ source = [
     'graph7.c',
 ]
 
-env.StaticLibrary(target='graph7-%s' % env['VERSION'], source=source)
+env.StaticLibrary(target='graph7-{version}'.format(version=env['VERSION']), source=source)
 env.SharedLibrary(target = 'graph7', source=source)
