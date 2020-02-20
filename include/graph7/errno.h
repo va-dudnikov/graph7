@@ -15,6 +15,7 @@
 #define GRAPH7_INVALID_HEADER   3   //!< Invalid header
 #define GRAPH7_INVALID_DATA     4   //!< Invalid data
 #define GRAPH7_ALLOC_ERROR      5   //!< Allocator return NULL
+#define GRAPH7_UNSUPPORTED      6   //!< If something unsupported
 
 /*! \} */
 

@@ -5,6 +5,8 @@ env['CFLAGS'] = ['-O2']
 
 source = [
     'graph7.c',
+    'graph6.c',
+    'utils.c',
 ]
 
 env.StaticLibrary(target='graph7-{version}'.format(version=env['VERSION']), source=source)

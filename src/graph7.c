@@ -1,4 +1,5 @@
 #include <graph7/graph7.h>
+#include <graph7/utils.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -46,71 +47,6 @@ static uint8_t decoding_table[128] =
     0x31, 0x32, 0x33, 0xff, 0xff, 0xff, 0xff, 0xff,
 };
 
-/*
-    Check endianess
-    return: 0 - little-endian, 1 - big-endian
-*/
-static inline uint8_t endianness(void)
-{
-    uint32_t x = 1;
-    return (((uint8_t *)&x)[0]) ? 0 : 1;
-}
-
-/*
-    Reverse bytearray
-*/
-static inline void reverse(uint8_t *src, size_t length)
-{
-    size_t i;
-
-    for(i = 0; i < length / 2; i++)
-    {
-        uint8_t tmp = src[i];
-        src[i] = src[length - i - 1];
-        src[length - i - 1] = tmp;
-    }
-}
-
-static inline size_t sextet_pack(uint8_t *dst, const uint8_t *src, size_t length, uint8_t *tail)
-{
-    uint8_t t = length % 6;
-    size_t c = length / 6;
-    size_t i, j, k;
-
-    memset(dst, 0, (t ? c + 1 : c));
-
-    for(i = 0, k = 0; i < c; i++)
-    {
-        for(j = 0; j < 6; j++)
-            dst[i] |= (!!src[k++]) << (5 - j);
-    }
-
-    for(j = 0; j < t; j++)
-        dst[i] |= (!!src[k++]) << (5 - j);
-
-    if(tail)
-        *tail = t;
-
-    return (t ? c + 1 : c);
-}
-
-static inline size_t sextet_unpack(uint8_t *dst, const uint8_t *src, size_t length, uint8_t tail)
-{
-    size_t c = (tail) ? length - 1 : length;
-    size_t i, j, k;
-
-    for(i = 0, k = 0; i < c; i++)
-    {
-        for(j = 0; j < 6; j++)
-            dst[k++] = (src[i] >> (5 - j)) & 1;
-    }
-
-    for(j = 0; j < tail; j++)
-        dst[k++] = (src[i] >> (5 - j)) & 1;
-
-    return k;
-}
-
 static inline uint8_t width_pack(uint8_t *dst, size_t width)
 {
     size_t new_width = width;
@@ -122,8 +58,8 @@ static inline uint8_t width_pack(uint8_t *dst, size_t width)
     else if(new_width < 16777216) c = 4;
     else return 0;
 
-    if(endianness())
-        reverse((uint8_t *)&new_width, sizeof(size_t));
+    if(graph7_utils_endianness())
+        graph7_utils_reverse((uint8_t *)&new_width, sizeof(size_t));
 
     if(c > 0) dst[0] = new_width & BITMASK_6;
     if(c > 1) dst[1] = (new_width >> 6) & BITMASK_6;
@@ -147,8 +83,8 @@ static inline size_t width_unpack(const uint8_t *src, uint8_t c)
     if(c > 3)
         new_width |= (size_t)(src[3] << 18);
 
-    if(endianness())
-        reverse((uint8_t *)&new_width, sizeof(size_t));
+    if(graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
+        graph7_utils_reverse((uint8_t *)&new_width, sizeof(size_t));
 
     return new_width;
 }
@@ -308,7 +244,7 @@ ssize_t graph7_encode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
     }
     else
     {
-        out_length = sextet_pack(&dst[1], &src[0], k, &tail);
+        out_length = graph7_utils_sextet_pack(&dst[1], &src[0], k, &tail);
         sextet_encode(&dst[1], &dst[1], out_length);
     }
 
@@ -386,13 +322,13 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
             if(!sextet_decode(&buffer[0], &new_src[i * GRAPH7_BUFFER_SIZE], GRAPH7_BUFFER_SIZE))
                 return -GRAPH7_INVALID_DATA;
 
-            out_length += sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], GRAPH7_BUFFER_SIZE, 0);
+            out_length += graph7_utils_sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], GRAPH7_BUFFER_SIZE, 0);
         }
 
         if(!sextet_decode(&buffer[0], &new_src[i * GRAPH7_BUFFER_SIZE], t))
             return -GRAPH7_INVALID_DATA;
 
-        out_length += sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], t, header.tail);
+        out_length += graph7_utils_sextet_unpack(&dst[i * 6 * GRAPH7_BUFFER_SIZE], &buffer[0], t, header.tail);
     }
 
     if(gtype)
@@ -603,14 +539,14 @@ ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order
         }
     }
 
-    if(width > 1 && endianness())
+    if(width > 1 && graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
     {
         /*
             Если порядок байт big-endian, то переворачиваем, так как сохраняется
             всегда в little-endian.
         */
         for(size_t i = 0; i < length; i++)
-            reverse(&bytearray[i * _width], _width);
+            graph7_utils_reverse(&bytearray[i * _width], _width);
     }
 
     ssize_t ret = graph7_encode(dst, bytearray, length, gtype, width);
@@ -656,14 +592,14 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
      */
     order = (size_t)graph7_order((size_t)check, gtype);
 
-    if(width > 1 && endianness())
+    if(width > 1 && graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
     {
         /*
             Если порядок байт big-endian, то переворачиваем, так как сохраняется
             всегда в little-endian.
         */
         for(size_t i = 0; i < decoding_length / width; i++)
-            reverse(&bytearray[i * width], width);
+            graph7_utils_reverse(&bytearray[i * width], width);
     }
 
     if(gtype == GRAPH7_UNDIRECTED)
