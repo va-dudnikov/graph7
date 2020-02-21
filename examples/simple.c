@@ -1,5 +1,5 @@
 /*
- * Example 1. Simple example.
+ * Simple example.
  */
 
 #include <stdio.h>

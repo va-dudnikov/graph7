@@ -1,6 +1,10 @@
 #include <graph7/utils.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint8_t graph7_utils_endianness(void)
 {
     uint32_t x = 1;
@@ -70,3 +74,7 @@ size_t graph7_utils_ceiling_div(size_t numerator, size_t denominator)
 {
     return !!(numerator % denominator) + numerator / denominator;
 }
+
+#ifdef __cplusplus
+}
+#endif

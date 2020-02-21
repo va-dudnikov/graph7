@@ -1,6 +1,10 @@
 #include <graph7/graph6.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ssize_t graph7_graph6_order_encode(uint8_t *dst, size_t order)
 {
     if(!dst || !order)
@@ -92,7 +96,7 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
     {
         for(size_t j = 0; j < i; j++)
         {
-            dst[bytes] |= (!!src[GRAPH7_M_INDEX(j, i, order)]) << (5 - (bits % 6));
+            dst[bytes] |= (!!src[GRAPH7_M_INDEX(j, i, order)]) << (5 - (bits % 6)); // Get only upper triangle
             ++bits;
 
             if(bits % 6 == 0)
@@ -114,6 +118,9 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
 
 ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
 {
+    if(!dst || !src)
+        return -GRAPH7_INVALID_ARG;
+
     size_t order;
     ssize_t offset = graph7_graph6_order_decode(&order, src);
 
@@ -144,3 +151,7 @@ ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
 
     return order;
 }
+
+#ifdef __cplusplus
+}
+#endif
