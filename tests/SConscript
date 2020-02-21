@@ -1,0 +1,13 @@
+Import('env')
+
+env['LIBPATH'] = ['../src']
+env['CPPPATH'] += ['unity']
+env['LIBS'] = ['graph7-%s' % env['VERSION']]
+
+source = [
+    'unity/unity.c',
+    'test_graph6.c',
+    'runner.c',
+]
+
+env.Program(target='runner', source=source)
