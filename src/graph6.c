@@ -7,7 +7,7 @@ extern "C" {
 
 ssize_t graph7_graph6_order_encode(uint8_t *dst, size_t order)
 {
-    if(!dst || !order)
+    if(!dst || order < 2)
         return -GRAPH7_INVALID_ARG;
 
     // Case 1
@@ -73,7 +73,7 @@ ssize_t graph7_graph6_order_decode(size_t *dst, const uint8_t *src)
     for(uint8_t i = 0; i < nsextet; i++)
     {
         uint8_t offset = (nsextet - (i + 1)) * 6;
-        *dst |= (src[i + padding] - 63) << offset;
+        *dst |= ((size_t)(src[i + padding] - 63) << offset);
     }
 
     return padding + nsextet;
@@ -81,6 +81,9 @@ ssize_t graph7_graph6_order_decode(size_t *dst, const uint8_t *src)
 
 ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
 {
+    if(!src)
+        return -GRAPH7_INVALID_ARG;
+
     ssize_t offset = graph7_graph6_order_encode(dst, order);
 
     if(offset < 0)
@@ -118,7 +121,7 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
 
 ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
 {
-    if(!dst || !src)
+    if(!dst)
         return -GRAPH7_INVALID_ARG;
 
     size_t order;
