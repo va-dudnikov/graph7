@@ -30,10 +30,10 @@ typedef SSIZE_T ssize_t;
  * Other constants
  * \{
  */
-#define GRAPH7_COMPACT_ENCODING  0   //!< Encoding as 1 byte = 1 bit (passed to the width argument)
+#define GRAPH7_COMPACT_ENCODING  0                          //!< Encoding as 1 byte = 1 bit (passed to the width argument)
 #define GRAPH7_LITTLE_ENDIAN 0
 #define GRAPH7_BIG_ENDIAN 1
-#define GRAPH7_M_INDEX(i, j, order) ((i) * (order) + (j))
+#define GRAPH7_M_INDEX(i, j, order) ((i) * (order) + (j))   //!< Get array index
 /*! \} */
 
 /*!
