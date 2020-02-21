@@ -5,4 +5,3 @@ env['LIBS'] = ['graph7-%s' % env['VERSION']]
 env['CFLAGS'] = ['-g']
 
 env.Program(target='simple', source=['simple.c'])
-#env.Program(target='dev', source=['dev.c'])

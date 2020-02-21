@@ -34,9 +34,10 @@ env = Environment(tools=tools)
 debug = bool(ARGUMENTS.get('debug', False))
 examples = bool(ARGUMENTS.get('examples', False))
 docs = bool(ARGUMENTS.get('docs', False))
+tests = bool(ARGUMENTS.get('tests', False))
 
 env['VERSION'] = VERSION
-env['CPPPATH'] = INCLUDE_DIR
+env['CPPPATH'] = [INCLUDE_DIR]
 
 ################################################################################
 ## BUILDING
@@ -45,3 +46,6 @@ SConscript('src/SConscript', exports=['env'])
 
 if examples:
     SConscript('examples/SConscript', exports=['env'])
+
+if tests:
+    SConscript('tests/SConscript', exports=['env'])
