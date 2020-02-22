@@ -1,4 +1,4 @@
-# graph7 0.0.1-alpha.2
+# graph7
 
 ## Requirements
 Library written on pure C and no special requirements.
