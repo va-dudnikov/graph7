@@ -9,9 +9,9 @@ INCLUDE_DIR = os.path.join(BASE_DIR, 'include')
 # Version of library
 MAJOR = 0
 MINOR = 0
-PATCH = 1
+PATCH = 2
 
-PRE_RELEASE = '-alpha.2'
+PRE_RELEASE = '-alpha.1'
 
 VERSION = '{major}.{minor}.{patch}{pre_release}'.format(
     major=MAJOR,
