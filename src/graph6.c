@@ -105,7 +105,7 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
             if(bits % 6 == 0)
             {
                 dst[bytes] += 63;
-                bytes += 1;
+                ++bytes;
             }
         }
     }
@@ -113,7 +113,7 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
     if(bits % 6 != 0)
     {
         dst[bytes] += 63;
-        bytes += 1;
+        ++bytes;
     }
 
     return bytes;
@@ -153,6 +153,86 @@ ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
         dst[GRAPH7_M_INDEX(i, i, order)] = 0;
 
     return order;
+}
+
+ssize_t graph7_digraph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
+{
+    if(!src)
+        return -GRAPH7_INVALID_ARG;
+
+    ssize_t offset = graph7_graph6_order_encode(&dst[1], order);
+
+    if(offset < 0)
+        return offset;
+
+    dst[0] = 38; // '&'
+    ++offset;
+
+    size_t bits = 0;
+    size_t bytes = offset;
+
+    // Clear dst
+    memset((void *)&dst[offset], 0, graph7_utils_ceiling_div(order * order, 6));
+
+    for(; bits < order * order;)
+    {
+        dst[bytes] |= (!!src[bits]) << (5 - (bits % 6));
+        ++bits;
+
+        if(bits % 6 == 0)
+        {
+            dst[bytes] += 63;
+            ++bytes;
+        }
+    }
+
+    if(bits % 6 != 0)
+    {
+        dst[bytes] += 63;
+        ++bytes;
+    }
+
+    return bytes;
+}
+
+ssize_t graph7_digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
+{
+    if(!dst)
+        return -GRAPH7_INVALID_ARG;
+
+    if(src[0] != 38)
+        return -GRAPH7_INVALID_HEADER;
+
+    size_t order;
+    ssize_t offset = graph7_graph6_order_decode(&order, &src[1]);
+
+    if(offset < 0)
+        return offset;
+
+    ++offset;
+
+    size_t bits = 0;
+    size_t bytes = offset;
+
+    for(; bits < order * order;)
+    {
+        uint8_t value = ((src[bytes] - 63) >> (5 - (bits % 6))) & 1;
+        dst[bits] = value;
+        ++bits;
+
+        if(bits % 6 == 0)
+            bytes += 1;
+    }
+
+    return order;
+}
+
+ssize_t graph7_sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
+{
+}
+
+ssize_t graph7_sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
+{
 }
 
 #ifdef __cplusplus

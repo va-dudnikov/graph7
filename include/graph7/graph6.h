@@ -15,6 +15,14 @@ ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_
 
 ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src);
 
+ssize_t graph7_digraph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order);
+
+ssize_t graph7_digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src);
+
+ssize_t graph7_sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order);
+
+ssize_t graph7_sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src);
+
 #ifdef __cplusplus
 }
 #endif
