@@ -7,7 +7,7 @@ extern "C" {
 
 ssize_t graph7_graph6_order_encode(uint8_t *dst, size_t order)
 {
-    if(!dst || order < 2)
+    if(!dst)
         return -GRAPH7_INVALID_ARG;
 
     // Case 1
