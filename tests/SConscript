@@ -6,6 +6,7 @@ env['LIBS'] = ['graph7-%s' % env['VERSION']]
 
 source = [
     'unity/unity.c',
+    'utils.c',
     'test_graph6.c',
     'runner.c',
 ]
