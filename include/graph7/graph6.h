@@ -1,5 +1,5 @@
-#ifndef GRAPH7_GRAPH6_H
-#define GRAPH7_GRAPH6_H
+#ifndef GRAPH6_H
+#define GRAPH6_H
 
 #include <graph7/utils.h>
 
@@ -34,4 +34,4 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
 }
 #endif
 
-#endif // GRAPH7_GRAPH6_H
+#endif // GRAPH6_H

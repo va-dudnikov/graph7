@@ -1,5 +1,5 @@
-#ifndef GRAPH7_bitstream_H
-#define GRAPH7_bitstream_H
+#ifndef BITSTREAM_H
+#define BITSTREAM_H
 
 #include <graph7/def.h>
 
@@ -27,4 +27,4 @@ void bitstream_encode_number(bitstream_t *stream, size_t x, size_t k);
 
 size_t bitstream_decode_number(bitstream_t *stream, size_t k);
 
-#endif // GRAPH7_bitstream_H
+#endif // BITSTREAM_H

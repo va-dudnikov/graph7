@@ -77,8 +77,8 @@ struct graph7_wheader
     uint8_t reserved        :2; //!< Reserved bits for encoding to ascii
 };
 
-typedef uint8_t graph7_gtype_t; //!< Type of graph.
-typedef struct graph7_header graph7_header_t; //!< Main header
+typedef uint8_t graph7_gtype_t;                 //!< Type of graph.
+typedef struct graph7_header graph7_header_t;   //!< Main header
 typedef struct graph7_wheader graph7_wheader_t; //!< Header for weighted graphs
 
 #endif // GRAPH7_DEF_H
