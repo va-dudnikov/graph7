@@ -1,11 +1,12 @@
 #include <graph7/graph6.h>
+#include <graph7/bitstream.h>
 #include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-ssize_t graph7_graph6_order_encode(uint8_t *dst, size_t order)
+ssize_t graph6_order_encode(uint8_t *dst, size_t order)
 {
     if(!dst)
         return -GRAPH7_INVALID_ARG;
@@ -42,7 +43,7 @@ ssize_t graph7_graph6_order_encode(uint8_t *dst, size_t order)
     return padding + nsextet;
 }
 
-ssize_t graph7_graph6_order_decode(size_t *dst, const uint8_t *src)
+ssize_t graph6_order_decode(size_t *dst, const uint8_t *src)
 {
     if(!dst || !src)
         return -GRAPH7_INVALID_ARG;
@@ -79,72 +80,100 @@ ssize_t graph7_graph6_order_decode(size_t *dst, const uint8_t *src)
     return padding + nsextet;
 }
 
-ssize_t graph7_graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
+ssize_t graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, bool header)
 {
-    if(!src)
+    if(!dst || !src)
         return -GRAPH7_INVALID_ARG;
 
-    ssize_t offset = graph7_graph6_order_encode(dst, order);
+    size_t bytes = 0;
+
+    if(header)
+    {
+        memmove(dst, GRAPH6_HEADER, GRAPH6_HEADER_LEN);
+        bytes += GRAPH6_HEADER_LEN;
+    }
+
+    ssize_t offset = graph6_order_encode(&dst[bytes], order);
 
     if(offset < 0)
         return offset;
 
-    size_t bits = 0;
-    size_t bytes = offset;
+    bytes += offset;
 
-    // Clear dst
-    memset((void *)&dst[offset], 0, graph7_utils_ceiling_div(order * (order - 1) / 2, 6));
+    bitstream_t stream;
+    bitstream_init(&stream, &dst[bytes], 6);
 
     for(size_t i = 1; i < order; i++)
     {
         for(size_t j = 0; j < i; j++)
-        {
-            dst[bytes] |= (!!src[GRAPH7_M_INDEX(j, i, order)]) << (5 - (bits % 6)); // Get only upper triangle
-            ++bits;
-
-            if(bits % 6 == 0)
-            {
-                dst[bytes] += 63;
-                ++bytes;
-            }
-        }
+            bitstream_write(&stream, src[GRAPH7_M_INDEX(j, i, order)]);
     }
 
-    if(bits % 6 != 0)
-    {
-        dst[bytes] += 63;
-        ++bytes;
-    }
+    size_t encoded = (size_t)bitstream_bytes_count(&stream);
 
-    return bytes;
+    for(size_t i = bytes; i < bytes + encoded; i++)
+        dst[i] += 63;
+
+    return bytes + encoded;
 }
 
-ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
+ssize_t graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 {
-    if(!dst)
+    if(!dst || !src)
         return -GRAPH7_INVALID_ARG;
 
+    size_t bytes = 0;
+
+    // Checking optional header
+    if(src[0] == '>')
+    {
+        if(length <= GRAPH6_HEADER_LEN)
+            return -GRAPH7_INVALID_LENGTH;
+
+        if(!graph7_utils_bytes_start_with(src, GRAPH6_HEADER, GRAPH6_HEADER_LEN))
+            return -GRAPH7_INVALID_HEADER;
+
+        bytes = GRAPH6_HEADER_LEN;
+    }
+
+    // At least one byte of information must occupy the graph
+    if(length < bytes + 1)
+        return -GRAPH7_INVALID_LENGTH;
+
     size_t order;
-    ssize_t offset = graph7_graph6_order_decode(&order, src);
+    ssize_t offset = graph6_order_decode(&order, &src[bytes]);
 
     if(offset < 0)
         return offset;
 
-    size_t bits = 0;
-    size_t bytes = offset;
+    bytes += offset;
+
+    // Checking that the length is not less than the need
+    if(length < bytes + graph7_utils_ceiling_div(order * (order - 1) / 2, 6))
+        return -GRAPH7_INVALID_LENGTH;
+
+    bitstream_t stream;
+    uint8_t byte;
+    bitstream_init(&stream, &byte, 6);
 
     for(size_t i = 1; i < order; i++)
     {
         for(size_t j = 0; j < i; j++)
         {
-            uint8_t value = ((src[bytes] - 63) >> (5 - (bits % 6))) & 1;
+            if(stream.bitp == 0)
+            {
+                bitstream_deinit(&stream);
+                byte = src[bytes] - 63;
+                if(byte > 63)
+                    return - GRAPH7_INVALID_DATA;
+
+                ++bytes;
+            }
+
+            bool value = bitstream_read(&stream);
+
             dst[GRAPH7_M_INDEX(j, i, order)] = value; // Upper triangle
             dst[GRAPH7_M_INDEX(i, j, order)] = value; // Lower triangle
-
-            ++bits;
-
-            if(bits % 6 == 0)
-                bytes += 1;
         }
     }
 
@@ -155,84 +184,206 @@ ssize_t graph7_graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
     return order;
 }
 
-ssize_t graph7_digraph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
+ssize_t digraph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, bool header)
 {
-    if(!src)
+    if(!dst || !src)
         return -GRAPH7_INVALID_ARG;
 
-    ssize_t offset = graph7_graph6_order_encode(&dst[1], order);
+    size_t bytes = 0;
+
+    if(header)
+    {
+        memmove(dst, DIGRAPH6_HEADER, DIGRAPH6_HEADER_LEN);
+        bytes += DIGRAPH6_HEADER_LEN;
+    }
+
+    ssize_t offset = graph6_order_encode(&dst[bytes + 1], order);
 
     if(offset < 0)
         return offset;
 
-    dst[0] = 38; // '&'
-    ++offset;
+    dst[bytes] = '&';
+    bytes += offset + 1;
 
-    size_t bits = 0;
-    size_t bytes = offset;
+    bitstream_t stream;
+    bitstream_init(&stream, &dst[bytes], 6);
 
-    // Clear dst
-    memset((void *)&dst[offset], 0, graph7_utils_ceiling_div(order * order, 6));
+    for(size_t i = 0; i < order * order; i++)
+        bitstream_write(&stream, src[i]);
 
-    for(; bits < order * order;)
-    {
-        dst[bytes] |= (!!src[bits]) << (5 - (bits % 6));
-        ++bits;
+    size_t encoded = (size_t)bitstream_bytes_count(&stream);
 
-        if(bits % 6 == 0)
-        {
-            dst[bytes] += 63;
-            ++bytes;
-        }
-    }
+    for(size_t i = bytes; i < bytes + encoded; i++)
+        dst[i] += 63;
 
-    if(bits % 6 != 0)
-    {
-        dst[bytes] += 63;
-        ++bytes;
-    }
-
-    return bytes;
+    return bytes + encoded;
 }
 
-ssize_t graph7_digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
+ssize_t digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 {
-    if(!dst)
+    if(!dst || !src)
         return -GRAPH7_INVALID_ARG;
 
-    if(src[0] != 38)
+    size_t bytes = 0;
+
+    // Checking optional header
+    if(src[0] == '>')
+    {
+        if(length <= DIGRAPH6_HEADER_LEN)
+            return -GRAPH7_INVALID_LENGTH;
+
+        if(!graph7_utils_bytes_start_with(src, DIGRAPH6_HEADER, DIGRAPH6_HEADER_LEN))
+            return -GRAPH7_INVALID_HEADER;
+
+        bytes = DIGRAPH6_HEADER_LEN;
+    }
+
+    // At least two bytes (required header and order of graph) of information must occupy the graph
+    if(length < bytes + 2)
+        return -GRAPH7_INVALID_LENGTH;
+
+    // Checking required header
+    if(src[bytes] != '&')
         return -GRAPH7_INVALID_HEADER;
 
     size_t order;
-    ssize_t offset = graph7_graph6_order_decode(&order, &src[1]);
+    ssize_t offset = graph6_order_decode(&order, &src[bytes + 1]);
 
     if(offset < 0)
         return offset;
 
-    ++offset;
+    bytes += offset + 1;
 
-    size_t bits = 0;
-    size_t bytes = offset;
+    // Checking that the length is not less than the need
+    if(length != bytes + graph7_utils_ceiling_div(order * order, 6))
+        return -GRAPH7_INVALID_LENGTH;
 
-    for(; bits < order * order;)
+    bitstream_t stream;
+    uint8_t byte;
+    bitstream_init(&stream, &byte, 6);
+
+    for(size_t i = 0; i < order * order; i++)
     {
-        uint8_t value = ((src[bytes] - 63) >> (5 - (bits % 6))) & 1;
-        dst[bits] = value;
-        ++bits;
+        if(stream.bitp == 0)
+        {
+            bitstream_deinit(&stream);
+            byte = src[bytes] - 63;
+            if(byte > 63)
+                return - GRAPH7_INVALID_DATA;
 
-        if(bits % 6 == 0)
-            bytes += 1;
+            ++bytes;
+        }
+
+        dst[i] = bitstream_read(&stream);
     }
 
     return order;
 }
 
-ssize_t graph7_sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order)
+ssize_t sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, uint8_t header)
 {
+    if(!dst || !src)
+        return -GRAPH7_INVALID_ARG;
+
+    size_t bytes = 0;
+
+    if(header)
+    {
+        memmove(dst, SPARSE6_HEADER, SPARSE6_HEADER_LEN);
+        bytes += SPARSE6_HEADER_LEN;
+    }
+
+    ssize_t offset = graph6_order_encode(&dst[bytes + 1], order);
+
+    if(offset < 0)
+        return offset;
+
+    dst[bytes] = ':';
+    bytes += offset + 1;
+
+    bitstream_t stream;
+    bitstream_init(&stream, &dst[bytes], 6);
+
+    size_t k = graph7_utils_count_bits(order - 1);
+    size_t current = 0;
+
+    for(size_t v = 1; v < order; v++)
+    {
+        for(size_t u = 0; u < v; u++)
+        {
+            for(size_t p = 0; p < src[GRAPH7_M_INDEX(u, v, order)]; p++)
+            {
+                if(v == current)
+                {
+                    bitstream_write(&stream, 0);
+                    bitstream_encode_number(&stream, u, k);
+                }
+                else if(v == current + 1)
+                {
+                    ++current;
+                    bitstream_write(&stream, 1);
+                    bitstream_encode_number(&stream, u, k);
+                }
+                else
+                {
+                    current = v;
+                    bitstream_write(&stream, 1);
+                    bitstream_encode_number(&stream, v, k);
+                    bitstream_write(&stream, 0);
+                    bitstream_encode_number(&stream, u, k);
+                }
+            }
+        }
+    }
+
+    uint8_t tail = stream.bitp ? 6 - (stream.bitp) : 0;
+
+    if(k < 6 && order == (1 << k) && tail >= k && current < (order - 1))
+        bitstream_write(&stream, 0);
+
+    for(size_t i = 0; i < tail; i++)
+        bitstream_write(&stream, 1);
+
+    size_t encoded = bitstream_bytes_count(&stream);
+
+    for(size_t i = bytes; i < bytes + encoded; i++)
+        dst[i] += 63;
+
+    return bytes + encoded;
 }
 
-ssize_t graph7_sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src)
+ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 {
+    if(!dst || !src)
+        return -GRAPH7_INVALID_ARG;
+
+    size_t bytes = 0;
+
+    // Checking optional header
+    if(src[0] == '>')
+    {
+        if(length <= SPARSE6_HEADER_LEN)
+            return -GRAPH7_INVALID_LENGTH;
+
+        if(!graph7_utils_bytes_start_with(src, SPARSE6_HEADER, SPARSE6_HEADER_LEN))
+            return -GRAPH7_INVALID_HEADER;
+
+        bytes = SPARSE6_HEADER_LEN;
+    }
+
+    // Checking required header
+    if(src[bytes] != ':')
+        return -GRAPH7_INVALID_HEADER;
+
+    size_t order;
+    ssize_t offset = graph6_order_decode(&order, &src[bytes + 1]);
+
+    if(offset < 0)
+        return offset;
+
+    bytes += offset + 1;
+
+    size_t k = graph7_utils_count_bits(order - 1);
 }
 
 #ifdef __cplusplus

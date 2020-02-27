@@ -75,6 +75,28 @@ size_t graph7_utils_ceiling_div(size_t numerator, size_t denominator)
     return !!(numerator % denominator) + numerator / denominator;
 }
 
+size_t graph7_utils_count_bits(size_t x)
+{
+    size_t k = 1;
+    while(1 << k <= x)
+        ++k;
+    return k;
+}
+
+bool graph7_utils_bytes_start_with(const uint8_t *src, const uint8_t *start, size_t start_length)
+{
+    if(!src || !start)
+        return false;
+
+    for(size_t i = 0; i < start_length; i++)
+    {
+        if(src[i] != start[i])
+            return false;
+    }
+
+    return true;
+}
+
 #ifdef __cplusplus
 }
 #endif

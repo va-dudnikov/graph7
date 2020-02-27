@@ -8,6 +8,18 @@
 #include <graph7/errno.h>
 #include <stdint.h>
 
+#ifndef bool
+#define bool uint8_t
+#endif
+
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
+#endif
+
 // MSVC haven't ssize_t
 #ifdef _MSC_VER
 #include <BaseTsd.h>

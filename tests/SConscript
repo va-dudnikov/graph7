@@ -8,6 +8,8 @@ source = [
     'unity/unity.c',
     'utils.c',
     'test_graph6.c',
+    'test_digraph6.c',
+    'test_sparse6.c',
     'runner.c',
 ]
 

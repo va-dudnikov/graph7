@@ -17,6 +17,10 @@ size_t graph7_utils_sextet_unpack(uint8_t *dst, const uint8_t *src, size_t lengt
 
 size_t graph7_utils_ceiling_div(size_t numerator, size_t denominator);
 
+size_t graph7_utils_count_bits(size_t x);
+
+bool graph7_utils_bytes_start_with(const uint8_t *src, const uint8_t *start, size_t start_length);
+
 #endif // GRAPH7_UTILS_H
 
 #ifdef __cplusplus
