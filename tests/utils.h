@@ -7,4 +7,6 @@ void rand_graph(uint8_t *dst, size_t order);
 
 void complete_graph(uint8_t *dst, size_t order);
 
+void path_graph(uint8_t *dst, size_t order);
+
 #endif // GRAPH7_TESTS_UTILS_H

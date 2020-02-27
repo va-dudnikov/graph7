@@ -15,6 +15,9 @@
 - [ ] Add more examples
 - [ ] Add support for another formats:
     - [X] graph6
-    - [ ] sparse6
-    - [X] digraph6
+	- [X] digraph6
+    - [X] sparse6
     - [ ] CSV
+- [ ] Make refactoring
+	- [ ] graph7 submodule
+		- [ ] Embed bitstream module

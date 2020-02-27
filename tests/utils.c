@@ -1,8 +1,11 @@
 #include <stdlib.h>
+#include <string.h>
+
 #include "utils.h"
 
 void rand_graph(uint8_t *dst, size_t order)
 {
+    memset(dst, 0, order * order);
     for(size_t i = 0; i < order - 1; i++)
     {
         for(size_t j = i + 1; j < order; j++)
@@ -18,6 +21,7 @@ void rand_graph(uint8_t *dst, size_t order)
 
 void complete_graph(uint8_t *dst, size_t order)
 {
+    memset(dst, 0, order * order);
     for(size_t i = 0; i < order; i++)
     {
         for(size_t j = 0; j < order; j++)
@@ -27,5 +31,15 @@ void complete_graph(uint8_t *dst, size_t order)
             else
                 dst[GRAPH7_M_INDEX(i, j, order)] = 1;
         }
+    }
+}
+
+void path_graph(uint8_t *dst, size_t order)
+{
+    memset(dst, 0, order * order);
+    for(size_t i = 0; i < order - 1; i++)
+    {
+        dst[GRAPH7_M_INDEX(i, i + 1, order)] = 1;
+        dst[GRAPH7_M_INDEX(i + 1, i, order)] = 1;
     }
 }

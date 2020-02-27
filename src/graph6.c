@@ -1,7 +1,24 @@
 #include <graph7/graph6.h>
 #include <graph7/bitstream.h>
+#include <stdlib.h>
 #include <string.h>
 
+//==============================================================================
+// PRIVATE
+static inline ssize_t sextet_decode(uint8_t *dst, const uint8_t *src, size_t length)
+{
+    for(size_t i = 0; i < length; i++)
+    {
+        dst[i] = src[i] - 63;
+        if(dst[i] > 63)
+            return -GRAPH7_INVALID_DATA;
+    }
+
+    return 0;
+}
+
+//==============================================================================
+// PUBLIC
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -148,28 +165,30 @@ ssize_t graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 
     bytes += offset;
 
+    size_t data_length = graph7_utils_ceiling_div(order * (order - 1) / 2, 6);
+
     // Checking that the length is not less than the need
-    if(length < bytes + graph7_utils_ceiling_div(order * (order - 1) / 2, 6))
+    if(length < bytes + data_length)
         return -GRAPH7_INVALID_LENGTH;
 
+    uint8_t *bytearray = (uint8_t *)malloc(data_length);
+
+    if(!bytearray)
+        return -GRAPH7_ALLOC_ERROR;
+
+    // Decoding and copy to other array
+    ssize_t status = sextet_decode(bytearray, &src[bytes], data_length);
+
+    if(status < 0)
+        goto _exit;
+
     bitstream_t stream;
-    uint8_t byte;
-    bitstream_init(&stream, &byte, 6);
+    bitstream_init(&stream, bytearray, 6);
 
     for(size_t i = 1; i < order; i++)
     {
         for(size_t j = 0; j < i; j++)
         {
-            if(stream.bitp == 0)
-            {
-                bitstream_deinit(&stream);
-                byte = src[bytes] - 63;
-                if(byte > 63)
-                    return - GRAPH7_INVALID_DATA;
-
-                ++bytes;
-            }
-
             bool value = bitstream_read(&stream);
 
             dst[GRAPH7_M_INDEX(j, i, order)] = value; // Upper triangle
@@ -181,7 +200,9 @@ ssize_t graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     for(size_t i = 0; i < order; i++)
         dst[GRAPH7_M_INDEX(i, i, order)] = 0;
 
-    return order;
+_exit:
+    free((void *)bytearray);
+    return status < 0 ? status : order;
 }
 
 ssize_t digraph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, bool header)
@@ -254,30 +275,32 @@ ssize_t digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t lengt
 
     bytes += offset + 1;
 
+    size_t data_length = graph7_utils_ceiling_div(order * order, 6);
+
     // Checking that the length is not less than the need
-    if(length != bytes + graph7_utils_ceiling_div(order * order, 6))
+    if(length != bytes + data_length)
         return -GRAPH7_INVALID_LENGTH;
 
+    uint8_t *bytearray = (uint8_t *)malloc(data_length);
+
+    if(!bytearray)
+        return -GRAPH7_ALLOC_ERROR;
+
+    // Decoding and copy to other array
+    ssize_t status = sextet_decode(bytearray, &src[bytes], data_length);
+
+    if(status < 0)
+        goto _exit;
+
     bitstream_t stream;
-    uint8_t byte;
-    bitstream_init(&stream, &byte, 6);
+    bitstream_init(&stream, bytearray, 6);
 
     for(size_t i = 0; i < order * order; i++)
-    {
-        if(stream.bitp == 0)
-        {
-            bitstream_deinit(&stream);
-            byte = src[bytes] - 63;
-            if(byte > 63)
-                return - GRAPH7_INVALID_DATA;
-
-            ++bytes;
-        }
-
         dst[i] = bitstream_read(&stream);
-    }
 
-    return order;
+_exit:
+    free((void *)bytearray);
+    return status < 0 ? status : order;
 }
 
 ssize_t sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, uint8_t header)
@@ -377,13 +400,62 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
 
     size_t order;
     ssize_t offset = graph6_order_decode(&order, &src[bytes + 1]);
+    memset((void *)dst, 0, order * order);
 
     if(offset < 0)
         return offset;
 
     bytes += offset + 1;
 
+    size_t data_length = length - bytes;
+
+    if(!data_length)
+        return order;
+
+    uint8_t *bytearray = (uint8_t *)malloc(data_length);
+
+    if(!bytearray)
+        return -GRAPH7_ALLOC_ERROR;
+
+    // Decoding and copy to other array
+    ssize_t status = sextet_decode(bytearray, &src[bytes], data_length);
+
+    if(status < 0)
+        goto _exit;
+
+    bitstream_t stream;
+    bitstream_init(&stream, bytearray, 6);
+
     size_t k = graph7_utils_count_bits(order - 1);
+    size_t bx_size = (data_length * 6) / (k + 1);
+
+    size_t v = 0;
+    for(size_t i = 0; i < bx_size; i++)
+    {
+        bool b = bitstream_read(&stream);
+        size_t x = bitstream_decode_number(&stream, k);
+
+        if(b)
+            ++v;
+
+        if(x >= order || v >= order)
+        {
+            break;
+        }
+        else if(x > v)
+        {
+            v = x;
+        }
+        else
+        {
+            ++dst[GRAPH7_M_INDEX(x, v, order)];
+            ++dst[GRAPH7_M_INDEX(v, x, order)];
+        }
+    }
+
+_exit:
+    free(bytearray);
+    return status < 0 ? status : order;
 }
 
 #ifdef __cplusplus
