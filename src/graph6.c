@@ -400,13 +400,13 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
 
     size_t order;
     ssize_t offset = graph6_order_decode(&order, &src[bytes + 1]);
-    memset((void *)dst, 0, order * order);
 
     if(offset < 0)
         return offset;
 
     bytes += offset + 1;
 
+    // TODO: Make checking about correct length
     size_t data_length = length - bytes;
 
     if(!data_length)
@@ -422,6 +422,8 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
 
     if(status < 0)
         goto _exit;
+
+    memset((void *)dst, 0, order * order); // For ++ action
 
     bitstream_t stream;
     bitstream_init(&stream, bytearray, 6);
