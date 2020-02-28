@@ -20,6 +20,11 @@ void test_sparse6_encode(void);
 void test_sparse6_decode(void);
 void test_sparse_encode_decode(void);
 
+// graph7
+void test_graph7_encode(void);
+void test_graph7_decode(void);
+void test_graph7_encode_decode(void);
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -40,6 +45,10 @@ int main(void)
     RUN_TEST(test_sparse6_encode);
     RUN_TEST(test_sparse6_decode);
     RUN_TEST(test_sparse_encode_decode);
+
+    RUN_TEST(test_graph7_encode);
+    RUN_TEST(test_graph7_decode);
+    RUN_TEST(test_graph7_encode_decode);
 
     return UNITY_END();
 }

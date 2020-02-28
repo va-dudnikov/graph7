@@ -5,12 +5,11 @@
 
 #include "utils.h"
 
-#define BUFF12_SIZE (1000 * 1000)
-#define BUFF3_SIZE 166671 // 4 + ceiling(1000 * 1000 / 6)
+#define BUFF_SIZE (1000 * 1000)
 
-static uint8_t buff1[BUFF12_SIZE];
-static uint8_t buff2[BUFF12_SIZE];
-static uint8_t buff3[BUFF3_SIZE];
+static uint8_t buff1[BUFF_SIZE];
+static uint8_t buff2[BUFF_SIZE];
+static uint8_t buff3[BUFF_SIZE];
 
 void test_digraph6_encode(void)
 {
@@ -67,4 +66,31 @@ void test_digraph6_decode(void)
 
 void test_digraph6_encode_decode(void)
 {
+    // Graphs
+    size_t orders[] =
+    {
+        // k = order * (order - 1) / 2
+        6, 504, 996, // k % 6 == 0
+        1, 503, 997, // k % 6 == 1
+        3, 501, 999, // k % 6 == 3
+        2, 500, 992  // k % 6 == 4
+    };
+
+    for(size_t i = 0; i < 16; i++)
+    {
+        size_t order = orders[i];
+        size_t bytes = 1 + graph7_utils_ceiling_div(order * order, 6);
+
+        if(order < 63)
+            bytes += 1;
+        else if(order > 63 && order < 258048)
+            bytes += 4;
+        else
+            bytes += 8;
+
+        rand_dirgraph(buff1, order);
+        TEST_ASSERT_EQUAL(bytes, digraph6_encode_from_matrix(buff3, buff1, order, false));
+        TEST_ASSERT_EQUAL(order, digraph6_decode_to_matrix(buff2, buff3, bytes));
+        TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff2, order * order);
+    }
 }

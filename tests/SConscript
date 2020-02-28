@@ -10,6 +10,7 @@ source = [
     'test_graph6.c',
     'test_digraph6.c',
     'test_sparse6.c',
+    'test_graph7.c',
     'runner.c',
 ]
 

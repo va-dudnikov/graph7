@@ -19,6 +19,18 @@ void rand_graph(uint8_t *dst, size_t order)
         dst[GRAPH7_M_INDEX(i, i, order)] = 0;
 }
 
+void rand_dirgraph(uint8_t *dst, size_t order)
+{
+    memset(dst, 0, order * order);
+    for(size_t i = 0; i < order; i++)
+    {
+        for(size_t j = 0; j < order; j++)
+        {
+            dst[GRAPH7_M_INDEX(i, j, order)] = rand() % 2;
+        }
+    }
+}
+
 void complete_graph(uint8_t *dst, size_t order)
 {
     memset(dst, 0, order * order);

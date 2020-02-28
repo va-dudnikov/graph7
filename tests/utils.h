@@ -5,6 +5,8 @@
 
 void rand_graph(uint8_t *dst, size_t order);
 
+void rand_dirgraph(uint8_t *dst, size_t order);
+
 void complete_graph(uint8_t *dst, size_t order);
 
 void path_graph(uint8_t *dst, size_t order);
