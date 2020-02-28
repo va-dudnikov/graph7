@@ -5,8 +5,7 @@
 
 #include "utils.h"
 
-#define BUFF12_SIZE (1000 * 1000)
-#define BUFF3_SIZE 83254 // 4 + ceiling(1000 * 999 / (2 * 6))
+#define BUFF_SIZE (1000 * 1000)
 
 // Encoded complete graph with 67 vertices
 # define EC_67_K 373
@@ -18,9 +17,9 @@ static const uint8_t * ec67 =   "~?@B~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
                                 "~~~~~~~~~~~~w";
 
-static uint8_t buff1[BUFF12_SIZE];
-static uint8_t buff2[BUFF12_SIZE];
-static uint8_t buff3[BUFF3_SIZE];
+static uint8_t buff1[BUFF_SIZE];
+static uint8_t buff2[BUFF_SIZE];
+static uint8_t buff3[BUFF_SIZE];
 
 void test_graph6_order_encode(void)
 {
@@ -109,6 +108,13 @@ void test_graph6_encode(void)
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_encode_from_matrix(NULL, buff2, 42, false));
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_encode_from_matrix(buff1, NULL, 42, false));
 
+    // Null graph and trivial graph
+    TEST_ASSERT_EQUAL(1, graph6_encode_from_matrix(buff2, "", 0, false));
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("?", buff2, 1);
+
+    TEST_ASSERT_EQUAL(1, graph6_encode_from_matrix(buff2, "", 1, false));
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("@", buff2, 1);
+
     // Small complete graphs
     complete_graph(buff1, 4);
     TEST_ASSERT_EQUAL(2, graph6_encode_from_matrix(buff2, buff1, 4, false));
@@ -130,6 +136,15 @@ void test_graph6_decode(void)
     // Invalid arguments
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_decode_to_matrix(NULL, buff2, 42));
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_decode_to_matrix(buff1, NULL, 42));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, graph6_decode_to_matrix(buff1, GRAPH6_HEADER, GRAPH6_HEADER_LEN));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_HEADER, graph6_decode_to_matrix(buff1, ">>graph6<!!", GRAPH6_HEADER_LEN + 1));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, graph6_decode_to_matrix(buff1, "", 0));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, graph6_decode_to_matrix(buff1, "A", 1));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_DATA, graph6_decode_to_matrix(buff1, "A!", 2));
+
+    // Null graph and trivial graph
+    TEST_ASSERT_EQUAL(0, graph6_decode_to_matrix(buff1, "?", 1));
+    TEST_ASSERT_EQUAL(1, graph6_decode_to_matrix(buff1, "@", 1));
 
     // Small complete graphs
     complete_graph(buff2, 4);

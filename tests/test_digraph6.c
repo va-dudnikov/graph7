@@ -18,6 +18,20 @@ void test_digraph6_encode(void)
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, digraph6_encode_from_matrix(NULL, buff2, 42, false));
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, digraph6_encode_from_matrix(buff1, NULL, 42, false));
 
+    // Null graph
+    TEST_ASSERT_EQUAL(2, digraph6_encode_from_matrix(buff2, "", 0, false));
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("&?", buff2, 2);
+
+    // Trivial graph without loop
+    buff1[0] = 0;
+    TEST_ASSERT_EQUAL(3, digraph6_encode_from_matrix(buff2, buff1, 1, false));
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("&@?", buff2, 3);
+
+    // Trivial graph with loop
+    buff1[0] = 1;
+    TEST_ASSERT_EQUAL(3, digraph6_encode_from_matrix(buff2, buff1, 1, false));
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("&@_", buff2, 3);
+
     // Small complete graphs
     complete_graph(buff1, 4);
     TEST_ASSERT_EQUAL(5, digraph6_encode_from_matrix(buff2, buff1, 4, false));
@@ -33,6 +47,13 @@ void test_digraph6_decode(void)
     // Invalid arguments
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, digraph6_decode_to_matrix(NULL, buff2, 42));
     TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, digraph6_decode_to_matrix(buff1, NULL, 42));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, digraph6_decode_to_matrix(buff1, DIGRAPH6_HEADER, DIGRAPH6_HEADER_LEN));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_HEADER, digraph6_decode_to_matrix(buff1, ">>digraph6<!!", DIGRAPH6_HEADER_LEN + 1));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_HEADER, digraph6_decode_to_matrix(buff1, ">>digraph6<<aaaa", DIGRAPH6_HEADER_LEN + 4));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, digraph6_decode_to_matrix(buff1, "", 0));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, digraph6_decode_to_matrix(buff1, "&", 1));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_LENGTH, digraph6_decode_to_matrix(buff1, "&A", 2));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_DATA, digraph6_decode_to_matrix(buff1, "&A!", 3));
 
     // Small complete graphs
     complete_graph(buff2, 4);
