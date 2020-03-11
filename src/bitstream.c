@@ -1,9 +1,8 @@
 #include <graph7/bitstream.h>
 
-void bitstream_init(bitstream_t *self, uint8_t *memory, uint8_t group_size)
+void bitstream_init(bitstream_t *self, uint8_t *memory)
 {
     self->memory = memory;
-    self->group_size = group_size;
     self->bitp = 0;
     self->bytep = 0;
 }
@@ -20,7 +19,7 @@ void bitstream_write(bitstream_t *self, bool value)
     if(self->bitp == 0)
         self->memory[self->bytep] = 0;
 
-    self->memory[self->bytep] |= !!value << (self->group_size - 1 - self->bitp);
+    self->memory[self->bytep] |= !!value << (5 - self->bitp);
 
     if(self->bitp + 1 == 6)
     {
@@ -33,15 +32,9 @@ void bitstream_write(bitstream_t *self, bool value)
     }
 }
 
-void bitstream_write_bytes(bitstream_t *self, uint8_t *src, size_t length)
-{
-    for(size_t i = 0; i < length; i++)
-        bitstream_write(self, src[i]);
-}
-
 bool bitstream_read(bitstream_t *self)
 {
-    bool value =  self->memory[self->bytep] >> (self->group_size - 1 - self->bitp) & 1;
+    bool value =  self->memory[self->bytep] >> (5 - self->bitp) & 1;
 
     if(self->bitp + 1 == 6)
     {

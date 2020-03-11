@@ -16,7 +16,7 @@ extern "C" {
 
 ssize_t graph6_order_encode(uint8_t *dst, size_t order);
 
-ssize_t graph6_order_decode(size_t *dst, const uint8_t *src);
+ssize_t graph6_order_decode(size_t *dst, const uint8_t *src, size_t length);
 
 ssize_t graph6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order, bool header);
 

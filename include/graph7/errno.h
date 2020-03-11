@@ -19,4 +19,12 @@
 
 /*! \} */
 
+/*!
+ * \name Macroses
+ * \{
+ */
+
+#define GRAPH7_ERROR(condition, error) do { if(condition) return error; } while(0)
+
+/*! \} */
 #endif // GRAPH7_ERROR_H
