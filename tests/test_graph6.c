@@ -67,37 +67,37 @@ void test_graph6_order_decode(void)
     size_t order;
 
     // Invalid arguments
-    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_order_decode(NULL, "}"));
-    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_order_decode(&order, NULL));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_order_decode(NULL, "}", 1));
+    TEST_ASSERT_EQUAL(-GRAPH7_INVALID_ARG, graph6_order_decode(&order, NULL, 1));
 
     // Null graph
-    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "?"));
+    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "?", 1));
     TEST_ASSERT_EQUAL_size_t(0, order);
 
     // Trivial graph
-    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "@"));
+    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "@", 1));
     TEST_ASSERT_EQUAL_size_t(1, order);
 
     // 3 cases
     // Case 1
-    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "}"));
+    TEST_ASSERT_EQUAL(1, graph6_order_decode(&order, "}", 1));
     TEST_ASSERT_EQUAL_size_t(62, order);
 
     // Case 2
-    TEST_ASSERT_EQUAL(4, graph6_order_decode(&order, "~??~"));
+    TEST_ASSERT_EQUAL(4, graph6_order_decode(&order, "~??~", 4));
     TEST_ASSERT_EQUAL_size_t(63, order);
 
-    TEST_ASSERT_EQUAL(4, graph6_order_decode(&order, "~}~~"));
+    TEST_ASSERT_EQUAL(4, graph6_order_decode(&order, "~}~~", 4));
     TEST_ASSERT_EQUAL_size_t(258047, order);
 
     if(sizeof(size_t) > 4) // For 64-bit systems
     {
         // Case 3
-        TEST_ASSERT_EQUAL(8, graph6_order_decode(&order, "~~???~??"));
+        TEST_ASSERT_EQUAL(8, graph6_order_decode(&order, "~~???~??", 8));
         TEST_ASSERT_EQUAL_size_t(258048, order);
 
         // Unsupported case
-        TEST_ASSERT_EQUAL(8, graph6_order_decode(&order, "~~~~~~~~"));
+        TEST_ASSERT_EQUAL(8, graph6_order_decode(&order, "~~~~~~~~", 8));
         TEST_ASSERT_EQUAL_size_t(68719476735, order);
     }
 }

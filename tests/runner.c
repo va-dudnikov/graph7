@@ -1,4 +1,5 @@
 #include <unity.h>
+#include <stdlib.h>
 
 void setUp (void) {} /* Is run before every test, put unit init calls here. */
 void tearDown (void) {} /* Is run after every test, put unit clean-up calls here. */
@@ -21,12 +22,13 @@ void test_sparse6_decode(void);
 void test_sparse_encode_decode(void);
 
 // graph7
-void test_graph7_encode(void);
-void test_graph7_decode(void);
 void test_graph7_encode_decode(void);
+void test_graph7_decode_header(void);
+void test_graph7_encode_header(void);
 
 int main(void)
 {
+    srand(42);
     UNITY_BEGIN();
 
     // graph6
@@ -46,8 +48,9 @@ int main(void)
     RUN_TEST(test_sparse6_decode);
     RUN_TEST(test_sparse_encode_decode);
 
-    RUN_TEST(test_graph7_encode);
-    RUN_TEST(test_graph7_decode);
+    // graph7
+    RUN_TEST(test_graph7_encode_header);
+    RUN_TEST(test_graph7_decode_header);
     RUN_TEST(test_graph7_encode_decode);
 
     return UNITY_END();
