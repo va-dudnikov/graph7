@@ -19,9 +19,6 @@ static inline uint8_t utils_endianness(void)
 
 static inline void utils_reverse(uint8_t *src, size_t length)
 {
-    if(!src)
-        return;
-
     for(size_t i = 0; i < length / 2; i++)
     {
         uint8_t tmp = src[i];
@@ -45,9 +42,6 @@ static inline size_t utils_count_bits(size_t x)
 
 static inline bool utils_bytes_start_with(const uint8_t *src, const uint8_t *start, size_t start_length)
 {
-    if(!src || !start)
-        return false;
-
     for(size_t i = 0; i < start_length; i++)
     {
         if(src[i] != start[i])
