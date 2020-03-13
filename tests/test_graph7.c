@@ -7,7 +7,7 @@
 #include "utils.h"
 
 #define MAX_ORDER 25
-#define MAX_WIDTH 128
+#define MAX_WIDTH 33
 #define BUFF_SIZE (MAX_ORDER * MAX_ORDER * MAX_WIDTH)
 
 static uint8_t buff1[BUFF_SIZE];
