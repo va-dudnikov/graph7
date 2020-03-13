@@ -6,7 +6,14 @@
 #ifndef GRAPH6_H
 #define GRAPH6_H
 
-#include <graph7/utils.h>
+#include <graph7/def.h>
+
+#define GRAPH6_HEADER ">>graph6<<"
+#define GRAPH6_HEADER_LEN 10
+#define DIGRAPH6_HEADER ">>digraph6<<"
+#define DIGRAPH6_HEADER_LEN 12
+#define SPARSE6_HEADER ">>sparse6<<"
+#define SPARSE6_HEADER_LEN 11
 
 #ifdef __cplusplus
 extern "C" {

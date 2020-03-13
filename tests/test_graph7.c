@@ -1,7 +1,7 @@
 #include <unity.h>
 
 #include <string.h>
-#include <graph7/utils.h>
+#include <graph7/utils/misc.h>
 #include <graph7/graph7.h>
 
 #include "utils.h"
@@ -114,7 +114,7 @@ void test_graph7_decode_header(void)
 
     // Trivial graph | weigted = false, extended = false
     // Undirected
-    TEST_ASSERT_EQUAL(1, graph7_decode_header("A", 1, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(1, graph7_decode_header("A", 1, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(GRAPH7_COMPACT_ENCODING, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);

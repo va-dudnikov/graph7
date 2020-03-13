@@ -1,6 +1,7 @@
 #include <unity.h>
 
 #include <string.h>
+#include <graph7/utils/misc.h>
 #include <graph7/graph6.h>
 
 #include "utils.h"

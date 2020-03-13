@@ -1,17 +1,11 @@
 #include <graph7/graph6.h>
-#include <graph7/bitstream.h>
+#include <graph7/utils/misc.h>
+#include <graph7/utils/bitstream.h>
 #include <stdlib.h>
 #include <string.h>
 
 //==============================================================================
 // PRIVATE
-#define GRAPH6_HEADER ">>graph6<<"
-#define GRAPH6_HEADER_LEN 10
-#define DIGRAPH6_HEADER ">>digraph6<<"
-#define DIGRAPH6_HEADER_LEN 12
-#define SPARSE6_HEADER ">>sparse6<<"
-#define SPARSE6_HEADER_LEN 11
-
 static inline ssize_t sextet_decode(uint8_t *dst, const uint8_t *src, size_t length)
 {
     for(size_t i = 0; i < length; i++)

@@ -1,5 +1,5 @@
 #include <graph7/graph7.h>
-#include <graph7/utils.h>
+#include <graph7/utils/misc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
