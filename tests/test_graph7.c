@@ -119,149 +119,149 @@ void test_graph7_decode_header(void)
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(1, graph7_decode_header("C", 1, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(1, graph7_decode_header("C", 1, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(GRAPH7_COMPACT_ENCODING, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(1, graph7_decode_header("M", 1, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(1, graph7_decode_header("M", 1, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(GRAPH7_COMPACT_ENCODING, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(1, graph7_decode_header("O", 1, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(1, graph7_decode_header("O", 1, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(GRAPH7_COMPACT_ENCODING, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
 
     // Weight = 1 byte | weigted = true, extended = false
     // Undirected
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("BA", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("BA", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(1, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("DA", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("DA", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(1, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("VA", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("VA", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(1, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(2, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("XA", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("XA", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(1, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(2, tail);
 
     // Weight = 32 bytes | weigted = true, extended = false
     // Undirected
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("B+", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("B+", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(32, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("D+", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("D+", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(32, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("N+", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("N+", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(32, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(2, graph7_decode_header("P+", 2, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(2, graph7_decode_header("P+", 2, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(32, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
 
     // Weight = 33 bytes | weighted = true, extended = true, 1 sextet
     // Undirected
-    TEST_ASSERT_EQUAL(3, graph7_decode_header("BDg", 3, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(3, graph7_decode_header("BDg", 3, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(33, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(3, graph7_decode_header("DDg", 3, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(3, graph7_decode_header("DDg", 3, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(33, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(3, graph7_decode_header("FDg", 3, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(3, graph7_decode_header("FDg", 3, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(33, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(3, graph7_decode_header("HDg", 3, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(3, graph7_decode_header("HDg", 3, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(33, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(0, tail);
 
     // Weight = 65 bytes | weighted = true, extended = true, 2 sextets
     // Undirected
-    TEST_ASSERT_EQUAL(4, graph7_decode_header("BFAB", 4, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(4, graph7_decode_header("BFAB", 4, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(65, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(4, graph7_decode_header("DFAB", 4, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(4, graph7_decode_header("DFAB", 4, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(65, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(4, graph7_decode_header("NFAB", 4, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(4, graph7_decode_header("NFAB", 4, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(65, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(4, graph7_decode_header("PFAB", 4, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(4, graph7_decode_header("PFAB", 4, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(65, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
 
     // Weight = 4097 bytes | weighted = true, extended = true, 3 sextets
     // Undirected
-    TEST_ASSERT_EQUAL(5, graph7_decode_header("BHAAB", 5, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(5, graph7_decode_header("BHAAB", 5, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(4097, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(5, graph7_decode_header("DHAAB", 5, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(5, graph7_decode_header("DHAAB", 5, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(4097, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(5, graph7_decode_header("NHAAB", 5, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(5, graph7_decode_header("NHAAB", 5, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(4097, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(5, graph7_decode_header("PHAAB", 5, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(5, graph7_decode_header("PHAAB", 5, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(4097, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
 
     // Weight = 262145 bytes | weighted = true, extended = true, 4 sextets
     // Undirected
-    TEST_ASSERT_EQUAL(6, graph7_decode_header("BJAAAB", 6, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(6, graph7_decode_header("BJAAAB", 6, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(262145, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Directed
-    TEST_ASSERT_EQUAL(6, graph7_decode_header("DJAAAB", 6, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(6, graph7_decode_header("DJAAAB", 6, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(262145, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED, gtype);
     TEST_ASSERT_EQUAL(0, tail);
     // Undirected with loops
-    TEST_ASSERT_EQUAL(6, graph7_decode_header("NJAAAB", 6, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(6, graph7_decode_header("NJAAAB", 6, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(262145, width);
     TEST_ASSERT_EQUAL(GRAPH7_UNDIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);
     // Directed with loops
-    TEST_ASSERT_EQUAL(6, graph7_decode_header("PJAAAB", 6, &width, &gtype, &tail));
+    TEST_ASSERT_EQUAL(6, graph7_decode_header("PJAAAB", 6, &gtype, &width, &tail));
     TEST_ASSERT_EQUAL(262145, width);
     TEST_ASSERT_EQUAL(GRAPH7_DIRECTED_LOOPS, gtype);
     TEST_ASSERT_EQUAL(1, tail);

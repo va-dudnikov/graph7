@@ -279,7 +279,7 @@ ssize_t graph7_encode_header(uint8_t *dst, size_t order, graph7_gtype_t gtype, s
     return hsize;
 }
 
-ssize_t graph7_decode_header(const uint8_t *src, size_t length, size_t *width, graph7_gtype_t *gtype, uint8_t *tail)
+ssize_t graph7_decode_header(const uint8_t *src, size_t length, graph7_gtype_t *gtype, size_t *width, uint8_t *tail)
 {
     GRAPH7_ERROR(!src, -GRAPH7_INVALID_ARG);
     GRAPH7_ERROR(!length, -GRAPH7_INVALID_LENGTH);
@@ -375,7 +375,7 @@ ssize_t graph7_decode(uint8_t *dst, const uint8_t *src, size_t length, graph7_gt
     graph7_gtype_t _gtype;
     uint8_t _tail;
 
-    ssize_t hsize = graph7_decode_header(src, length, &_width, &_gtype, &_tail);
+    ssize_t hsize = graph7_decode_header(src, length, &_gtype, &_width, &_tail);
 
     GRAPH7_ERROR(hsize < 0, hsize);
 
@@ -546,7 +546,7 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     uint8_t tail;
     size_t ncells;
 
-    ssize_t hsize = graph7_decode_header(src, length, &width, &gtype, &tail);
+    ssize_t hsize = graph7_decode_header(src, length, &gtype, &width, &tail);
 
     GRAPH7_ERROR(hsize < 0, hsize);
 
