@@ -6,7 +6,7 @@ sphinx_source = [
     'index.rst',
     'getting-started/index.rst',
     'api-reference/index.rst',
-    'api-reference/graph7/index.rst',
+#    'api-reference/graph7/index.rst',
 ]
 
 env.Command(source='doxyfile', target='xml/index.xml', action='doxygen $SOURCE')
