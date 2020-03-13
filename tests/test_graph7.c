@@ -1,8 +1,8 @@
-#include <unity.h>
-
-#include <string.h>
 #include <graph7/utils/misc.h>
 #include <graph7/graph7.h>
+
+#include <unity.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -277,7 +277,7 @@ void test_graph7_encode_decode(void)
 
         // Undirected
         weighted_graph(buff1, order, 1, 2, false, false);
-        bytes = 1 + graph7_utils_ceiling_div(order * (order - 1) / 2, 6);
+        bytes = 1 + utils_ceiling_div(order * (order - 1) / 2, 6);
 
         TEST_ASSERT_EQUAL(
             bytes,
@@ -288,7 +288,7 @@ void test_graph7_encode_decode(void)
 
         // Directed
         weighted_graph(buff1, order, 1, 2, true, false);
-        bytes = 1 + graph7_utils_ceiling_div(order * (order - 1), 6);
+        bytes = 1 + utils_ceiling_div(order * (order - 1), 6);
 
         TEST_ASSERT_EQUAL(
             bytes,
@@ -299,7 +299,7 @@ void test_graph7_encode_decode(void)
 
         // Undirected with loops
         weighted_graph(buff1, order, 1, 2, false, true);
-        bytes = 1 + graph7_utils_ceiling_div(order * (order + 1) / 2, 6);
+        bytes = 1 + utils_ceiling_div(order * (order + 1) / 2, 6);
 
         TEST_ASSERT_EQUAL(
             bytes,
@@ -310,7 +310,7 @@ void test_graph7_encode_decode(void)
 
         // Directed with loops
         weighted_graph(buff1, order, 1, 2, true, true);
-        bytes = 1 + graph7_utils_ceiling_div(order * order, 6);
+        bytes = 1 + utils_ceiling_div(order * order, 6);
 
         TEST_ASSERT_EQUAL(
             bytes,
@@ -334,28 +334,28 @@ void test_graph7_encode_decode(void)
             size_t bytes;
 
             // Undirected
-            bytes = offset + graph7_utils_ceiling_div(width * 8 * (order * (order - 1) / 2), 6);
+            bytes = offset + utils_ceiling_div(width * 8 * (order * (order - 1) / 2), 6);
             weighted_graph(buff1, order, width, 256, false, false);
             TEST_ASSERT_EQUAL(bytes, graph7_encode_from_matrix(buff2, buff1, order, GRAPH7_UNDIRECTED, width));
             TEST_ASSERT_EQUAL(order, graph7_decode_to_matrix(buff3, buff2, bytes));
             TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff3, order * order);
 
             // Directed
-            bytes = offset + graph7_utils_ceiling_div(width * 8 * (order * (order - 1)), 6);
+            bytes = offset + utils_ceiling_div(width * 8 * (order * (order - 1)), 6);
             weighted_graph(buff1, order, width, 256, true, false);
             TEST_ASSERT_EQUAL(bytes, graph7_encode_from_matrix(buff2, buff1, order, GRAPH7_DIRECTED, width));
             TEST_ASSERT_EQUAL(order, graph7_decode_to_matrix(buff3, buff2, bytes));
             TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff3, order * order);
 
             // Undirected with loops
-            bytes = offset + graph7_utils_ceiling_div(width * 8 * (order * (order + 1) / 2), 6);
+            bytes = offset + utils_ceiling_div(width * 8 * (order * (order + 1) / 2), 6);
             weighted_graph(buff1, order, width, 256, false, true);
             TEST_ASSERT_EQUAL(bytes, graph7_encode_from_matrix(buff2, buff1, order, GRAPH7_UNDIRECTED_LOOPS, width));
             TEST_ASSERT_EQUAL(order, graph7_decode_to_matrix(buff3, buff2, bytes));
             TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff3, order * order);
 
             // Directed with loops
-            bytes = offset + graph7_utils_ceiling_div(width * 8 * (order * order), 6);
+            bytes = offset + utils_ceiling_div(width * 8 * (order * order), 6);
             weighted_graph(buff1, order, width, 256, false, true);
             TEST_ASSERT_EQUAL(bytes, graph7_encode_from_matrix(buff2, buff1, order, GRAPH7_DIRECTED_LOOPS, width));
             TEST_ASSERT_EQUAL(order, graph7_decode_to_matrix(buff3, buff2, bytes));

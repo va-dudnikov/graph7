@@ -1,8 +1,8 @@
-#include <unity.h>
-
-#include <string.h>
 #include <graph7/utils/misc.h>
 #include <graph7/graph6.h>
+
+#include <unity.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -178,7 +178,7 @@ void test_graph6_encode_decode(void)
     for(size_t i = 0; i < 16; i++)
     {
         size_t order = orders[i];
-        size_t bytes = graph7_utils_ceiling_div(order * (order - 1) / 2, 6);
+        size_t bytes = utils_ceiling_div(order * (order - 1) / 2, 6);
 
         if(order < 63)
             bytes += 1;

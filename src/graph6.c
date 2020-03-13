@@ -1,6 +1,7 @@
 #include <graph7/graph6.h>
 #include <graph7/utils/misc.h>
 #include <graph7/utils/bitstream.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -143,7 +144,7 @@ ssize_t graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     {
         GRAPH7_ERROR(length <= GRAPH6_HEADER_LEN, -GRAPH7_INVALID_LENGTH);
         GRAPH7_ERROR(
-            !graph7_utils_bytes_start_with(src, GRAPH6_HEADER, GRAPH6_HEADER_LEN),
+            !utils_bytes_start_with(src, GRAPH6_HEADER, GRAPH6_HEADER_LEN),
             -GRAPH7_INVALID_HEADER
         );
 
@@ -160,7 +161,7 @@ ssize_t graph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 
     bytes += offset;
 
-    size_t data_length = graph7_utils_ceiling_div(order * (order - 1) / 2, 6);
+    size_t data_length = utils_ceiling_div(order * (order - 1) / 2, 6);
 
     // Checking that the length is not less than the need
     GRAPH7_ERROR(length < bytes + data_length, -GRAPH7_INVALID_LENGTH);
@@ -242,7 +243,7 @@ ssize_t digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t lengt
     {
         GRAPH7_ERROR(length <= DIGRAPH6_HEADER_LEN, -GRAPH7_INVALID_LENGTH);
         GRAPH7_ERROR(
-            !graph7_utils_bytes_start_with(src, DIGRAPH6_HEADER, DIGRAPH6_HEADER_LEN),
+            !utils_bytes_start_with(src, DIGRAPH6_HEADER, DIGRAPH6_HEADER_LEN),
             -GRAPH7_INVALID_HEADER;
         );
 
@@ -262,7 +263,7 @@ ssize_t digraph6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t lengt
 
     bytes += offset + 1;
 
-    size_t data_length = graph7_utils_ceiling_div(order * order, 6);
+    size_t data_length = utils_ceiling_div(order * order, 6);
 
     // Checking that the length is not less than the need
     GRAPH7_ERROR(length != bytes + data_length, -GRAPH7_INVALID_LENGTH);
@@ -313,7 +314,7 @@ ssize_t sparse6_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t orde
     bitstream_t stream;
     bitstream_init(&stream, &dst[bytes]);
 
-    size_t k = graph7_utils_count_bits(order - 1);
+    size_t k = utils_count_bits(order - 1);
     size_t current = 0;
 
     for(size_t v = 1; v < order; v++)
@@ -372,7 +373,7 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
     {
         GRAPH7_ERROR(length <= SPARSE6_HEADER_LEN, -GRAPH7_INVALID_LENGTH);
         GRAPH7_ERROR(
-            !graph7_utils_bytes_start_with(src, SPARSE6_HEADER, SPARSE6_HEADER_LEN),
+            !utils_bytes_start_with(src, SPARSE6_HEADER, SPARSE6_HEADER_LEN),
             -GRAPH7_INVALID_HEADER
         );
 
@@ -410,7 +411,7 @@ ssize_t sparse6_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length
     bitstream_t stream;
     bitstream_init(&stream, bytearray);
 
-    size_t k = graph7_utils_count_bits(order - 1);
+    size_t k = utils_count_bits(order - 1);
     size_t bx_size = (data_length * 6) / (k + 1);
 
     size_t v = 0;

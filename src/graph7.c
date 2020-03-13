@@ -1,5 +1,6 @@
 #include <graph7/graph7.h>
 #include <graph7/utils/misc.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -63,8 +64,8 @@ static inline uint8_t width_pack(uint8_t *dst, size_t width)
         }
     }
 
-    if(graph7_utils_endianness())
-        graph7_utils_reverse((uint8_t *)&new_width, sizeof(size_t));
+    if(utils_endianness())
+        utils_reverse((uint8_t *)&new_width, sizeof(size_t));
 
     for(uint8_t i = 0; i < c; i++)
         dst[i] = (new_width >> i * 6) & BITMASK_6;
@@ -79,8 +80,8 @@ static inline size_t width_unpack(const uint8_t *src, uint8_t c)
     for(uint8_t i = 0; i < c; i++)
         new_width |= (size_t)(src[i] << i * 6);
 
-    if(graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
-        graph7_utils_reverse((uint8_t *)&new_width, sizeof(size_t));
+    if(utils_endianness() == GRAPH7_BIG_ENDIAN)
+        utils_reverse((uint8_t *)&new_width, sizeof(size_t));
 
     return new_width;
 }
@@ -521,12 +522,12 @@ ssize_t graph7_encode_from_matrix(uint8_t *dst, const uint8_t *src, size_t order
     // the data format to the user, but I need this option, what to
     // enable it for the python module.
     #ifdef GRAPH7_LITTLE_ENDIAN_WIDTH_DATA
-    if(width > 1 && graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
+    if(width > 1 && utils_endianness() == GRAPH7_BIG_ENDIAN)
     {
         // If the byte order is big-endian, then we reverse data over,
         // since it is always stored in little-endian.
         for(size_t i = 0; i < ncells; i++)
-            graph7_utils_reverse(&bytearray[i * _width], _width);
+            utils_reverse(&bytearray[i * _width], _width);
     }
     #endif
 
@@ -590,12 +591,12 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
     // the data format to the user, but I need this option, what to
     // enable it for the python module.
     #ifdef GRAPH7_LITTLE_ENDIAN_WIDTH_DATA
-    if(width > 1 && graph7_utils_endianness() == GRAPH7_BIG_ENDIAN)
+    if(width > 1 && utils_endianness() == GRAPH7_BIG_ENDIAN)
     {
         // If the byte order is big-endian, then we reverse data over,
         // since it is always stored in little-endian.
         for(size_t i = 0; i < data_size / _width; i++)
-            graph7_utils_reverse(&bytearray[i * _width], _width);
+            utils_reverse(&bytearray[i * _width], _width);
     }
     #endif
 

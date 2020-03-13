@@ -3,16 +3,16 @@
 
 #include <graph7/def.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct bitstream
 {
     uint8_t *memory;    //!< Pointer to memory where we will write
     uint8_t bitp;       //!< Pointer to current bit where we will write
     size_t bytep;       //!< Pointer to current byte where we will write
 } bitstream_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 static inline void bitstream_init(bitstream_t *self, uint8_t *memory)
 {

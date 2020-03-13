@@ -11,13 +11,13 @@
 extern "C" {
 #endif
 
-static inline uint8_t graph7_utils_endianness(void)
+static inline uint8_t utils_endianness(void)
 {
     uint32_t x = 1;
     return (((uint8_t *)&x)[0]) ? 0 : 1;
 }
 
-static inline void graph7_utils_reverse(uint8_t *src, size_t length)
+static inline void utils_reverse(uint8_t *src, size_t length)
 {
     if(!src)
         return;
@@ -30,12 +30,12 @@ static inline void graph7_utils_reverse(uint8_t *src, size_t length)
     }
 }
 
-static inline size_t graph7_utils_ceiling_div(size_t numerator, size_t denominator)
+static inline size_t utils_ceiling_div(size_t numerator, size_t denominator)
 {
     return !!(numerator % denominator) + numerator / denominator;
 }
 
-static inline size_t graph7_utils_count_bits(size_t x)
+static inline size_t utils_count_bits(size_t x)
 {
     size_t k = 1;
     while(1 << k <= x)
@@ -43,7 +43,7 @@ static inline size_t graph7_utils_count_bits(size_t x)
     return k;
 }
 
-static inline bool graph7_utils_bytes_start_with(const uint8_t *src, const uint8_t *start, size_t start_length)
+static inline bool utils_bytes_start_with(const uint8_t *src, const uint8_t *start, size_t start_length)
 {
     if(!src || !start)
         return false;
