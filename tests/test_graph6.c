@@ -175,7 +175,7 @@ void test_graph6_encode_decode(void)
         5, 500, 992  // k % 6 == 4
     };
 
-    for(size_t i = 0; i < 16; i++)
+    for(size_t i = 0; i < 12; i++)
     {
         size_t order = orders[i];
         size_t bytes = utils_ceiling_div(order * (order - 1) / 2, 6);

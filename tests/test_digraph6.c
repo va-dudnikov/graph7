@@ -77,7 +77,7 @@ void test_digraph6_encode_decode(void)
         2, 500, 992  // k % 6 == 4
     };
 
-    for(size_t i = 0; i < 16; i++)
+    for(size_t i = 0; i < 12; i++)
     {
         size_t order = orders[i];
         size_t bytes = 1 + utils_ceiling_div(order * order, 6);
