@@ -2,8 +2,8 @@
  * \file
  * \brief Misc useful utils.
  */
-#ifndef GRAPH7_UTILS_H
-#define GRAPH7_UTILS_H
+#ifndef GRAPH7_MISC_H
+#define GRAPH7_MISC_H
 
 #include <graph7/def.h>
 
@@ -55,4 +55,5 @@ static inline bool utils_bytes_start_with(const uint8_t *src, const uint8_t *sta
 
 #ifdef __cplusplus
 }
-#endif
+
+#endif // GRAPH7_MISC_H
