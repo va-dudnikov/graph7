@@ -1,9 +1,0 @@
-Import('env')
-
-env['LIBPATH'] = ['../src']
-env['LIBS'] = ['graph7-%s' % env['VERSION']]
-env['CFLAGS'] = ['-g']
-
-env.Program(target='graph7_simple', source=['graph7_simple.c'])
-env.Program(target='graph7_weighted', source=['graph7_weighted.c'])
-
