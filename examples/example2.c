@@ -1,5 +1,5 @@
 /*
- * Example for weighted graph.
+ * graph7 encoding and decoding weighted graph.
  */
 
 #include <stdio.h>

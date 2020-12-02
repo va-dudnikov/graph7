@@ -1,11 +1,7 @@
-#ifndef BITSTREAM_H
-#define BITSTREAM_H
+#ifndef _GRAPH7_BITSTREAM_H
+#define _GRAPH7_BITSTREAM_H
 
-#include <graph7/def.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <graph7/defs.h>
 
 typedef struct bitstream
 {
@@ -13,6 +9,10 @@ typedef struct bitstream
     uint8_t bitp;       //!< Pointer to current bit where we will write
     size_t bytep;       //!< Pointer to current byte where we will write
 } bitstream_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static inline void bitstream_init(bitstream_t *self, uint8_t *memory)
 {
@@ -87,4 +87,4 @@ static inline size_t bitstream_decode_number(bitstream_t *stream, size_t k)
 }
 #endif
 
-#endif // BITSTREAM_H
+#endif // _GRAPH7_BITSTREAM_H

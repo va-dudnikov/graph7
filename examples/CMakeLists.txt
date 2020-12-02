@@ -1,2 +1,5 @@
-add_executable(graph7_simple graph7_simple.c)
-target_link_libraries(graph7_simple $<TARGET_OBJECTS:objlib>)
+add_executable(example1 example1.c)
+add_executable(example2 example2.c)
+add_executable(development development.c)
+target_link_libraries(example1 $<TARGET_OBJECTS:objlib>)
+target_link_libraries(example2 $<TARGET_OBJECTS:objlib>)

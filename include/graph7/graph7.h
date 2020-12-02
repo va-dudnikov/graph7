@@ -1,16 +1,15 @@
-/*!
- * \file
- * \brief The file contains definition of API functions for working with graph7 encoding format.
+/*
+ * The file contains definition of API functions for working with graph7 encoding format.
  */
 
-#ifndef GRAPH7_H
-#define GRAPH7_H
-
-#include <graph7/def.h>
+#ifndef _GRAPH7_H
+#define _GRAPH7_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <graph7/defs.h>
 
 /*!
  * \brief The function for encoding graph7 header.
@@ -96,4 +95,4 @@ ssize_t graph7_decode_to_matrix(uint8_t *dst, const uint8_t *src, size_t length)
 }
 #endif
 
-#endif // GRAPH7_H
+#endif // _GRAPH7_H

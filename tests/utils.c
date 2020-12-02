@@ -1,3 +1,5 @@
+#include <graph7/utils/misc.h>
+
 #include <stdlib.h>
 #include <string.h>
 

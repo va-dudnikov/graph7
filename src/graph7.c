@@ -1,4 +1,5 @@
 #include <graph7/graph7.h>
+#include <graph7/errno.h>
 #include <graph7/utils/misc.h>
 
 #include <string.h>
@@ -15,6 +16,30 @@
 #define BITMASK_5 0x1F
 #define BITMASK_6 0x3F
 #define BITMASK_7 0x7F
+
+/*!
+ * \brief The main format header
+ */
+struct graph7_header
+{
+    uint8_t weighed     :1; //!< For weighted graph
+    uint8_t gtype       :2; //!< Type of graph
+    uint8_t tail        :3; //!< Tail bits when grouping data by 6 bit
+    uint8_t reserved    :2; //!< Reserved bits for encoding to ascii
+};
+
+/*!
+ * \brief The header for weighted graphs.
+ */
+struct graph7_wheader
+{
+    uint8_t extended        :1; //!< For weighted graphs with large data type
+    uint8_t width           :5; //!< Size of data type
+    uint8_t reserved        :2; //!< Reserved bits for encoding to ascii
+};
+
+typedef struct graph7_header graph7_header_t;   //!< Main header
+typedef struct graph7_wheader graph7_wheader_t; //!< Header for weighted graphs
 
 static uint8_t encoding_table[64] =
 {
@@ -231,10 +256,6 @@ static inline size_t sextet_unpack(uint8_t *dst, const uint8_t *src, size_t leng
 
 //==============================================================================
 // PUBLIC
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 ssize_t graph7_encode_header(uint8_t *dst, size_t order, graph7_gtype_t gtype, size_t width)
 {
@@ -655,7 +676,3 @@ _exit:
     free(bytearray);
     return check > 0 ? (ssize_t)order : check;
 }
-
-#ifdef __cplusplus
-}
-#endif

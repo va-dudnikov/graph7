@@ -1,4 +1,5 @@
 #include <graph7/graph6.h>
+#include <graph7/errno.h>
 #include <graph7/utils/misc.h>
 #include <graph7/utils/bitstream.h>
 
@@ -20,9 +21,6 @@ static inline ssize_t sextet_decode(uint8_t *dst, const uint8_t *src, size_t len
 
 //==============================================================================
 // PUBLIC
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 ssize_t graph6_order_encode(uint8_t *dst, size_t order)
 {
@@ -442,7 +440,3 @@ _exit:
     free(bytearray);
     return status < 0 ? status : order;
 }
-
-#ifdef __cplusplus
-}
-#endif

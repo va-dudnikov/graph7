@@ -1,5 +1,5 @@
 /*
- * Simple example.
+ * graph7 encoding and decoding simple graph.
  */
 
 #include <stdio.h>

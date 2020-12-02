@@ -1,15 +1,20 @@
-/*!
- * \file
- * \brief Misc useful utils.
- */
-#ifndef GRAPH7_MISC_H
-#define GRAPH7_MISC_H
+#ifndef _GRAPH7_MISC_H
+#define _GRAPH7_MISC_H
 
-#include <graph7/def.h>
+#include <graph7/defs.h>
+
+#define GRAPH7_LITTLE_ENDIAN 0
+#define GRAPH7_BIG_ENDIAN 1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define GRAPH7_MIDX(i, j, order)\
+    ((i) * (order) + (j))
+
+#define GRAPH7_WMIDX(i, j, order, width)\
+    ((i) * (order) * (width) + (j) * (width))
 
 static inline uint8_t utils_endianness(void)
 {
@@ -56,4 +61,4 @@ static inline bool utils_bytes_start_with(const uint8_t *src, const uint8_t *sta
 #ifdef __cplusplus
 }
 
-#endif // GRAPH7_MISC_H
+#endif // _GRAPH7_MISC_H

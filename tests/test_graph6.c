@@ -1,5 +1,6 @@
-#include <graph7/utils/misc.h>
 #include <graph7/graph6.h>
+#include <graph7/errno.h>
+#include <graph7/utils/misc.h>
 
 #include <unity.h>
 #include <string.h>
