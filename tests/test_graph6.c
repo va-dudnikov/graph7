@@ -4,8 +4,12 @@
 
 #include <unity.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "utils.h"
+
+void setUp (void) {} /* Is run before every test, put unit init calls here. */
+void tearDown (void) {} /* Is run after every test, put unit clean-up calls here. */
 
 #define BUFF_SIZE (1000 * 1000)
 
@@ -193,4 +197,18 @@ void test_graph6_encode_decode(void)
         TEST_ASSERT_EQUAL(order, graph6_decode_to_matrix(buff2, buff3, bytes));
         TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff2, order * order);
     }
+}
+
+int main()
+{
+    srand(42);
+    UNITY_BEGIN();
+
+    RUN_TEST(test_graph6_order_encode);
+    RUN_TEST(test_graph6_order_decode);
+    RUN_TEST(test_graph6_encode);
+    RUN_TEST(test_graph6_decode);
+    RUN_TEST(test_graph6_encode_decode);
+
+    return UNITY_END();
 }

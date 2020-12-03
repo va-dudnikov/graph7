@@ -16,19 +16,19 @@ if(LIBM)
     list(APPEND EXTERNAL_LIBS "m")
 endif()
 
+enable_testing()
+
 include_directories(include)
 add_subdirectory(src)
+add_subdirectory(tests)
 
+# If need compile examples use -DEXAMPLES=1
 if (EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-if (TESTS)
-    add_subdirectory(tests)
-endif()
-
-install(TARGETS ${PROJECT_NAME}_static DESTINATION /lib)
-install(TARGETS ${PROJECT_NAME}_shared DESTINATION /lib)
+install(TARGETS ${PROJECT_NAME}_static DESTINATION ${CMAKE_BINARY_DIR}/install/lib)
+install(TARGETS ${PROJECT_NAME}_shared DESTINATION ${CMAKE_BINARY_DIR}/install/lib)
 install(
     FILES
     include/graph7/defs.h
@@ -36,5 +36,5 @@ install(
     include/graph7/graph6.h
     include/graph7/graph7.h
     DESTINATION
-    ${CMAKE_BINARY_DIR}/include/graph7
+    ${CMAKE_BINARY_DIR}/install/include/graph7
 )

@@ -4,8 +4,12 @@
 
 #include <unity.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "utils.h"
+
+void setUp (void) {} /* Is run before every test, put unit init calls here. */
+void tearDown (void) {} /* Is run after every test, put unit clean-up calls here. */
 
 #define MAX_ORDER 25
 #define MAX_WIDTH 33
@@ -363,4 +367,16 @@ void test_graph7_encode_decode(void)
             TEST_ASSERT_EQUAL_UINT8_ARRAY(buff1, buff3, order * order);
         }
     }
+}
+
+int main()
+{
+    srand(42);
+    UNITY_BEGIN();
+
+    RUN_TEST(test_graph7_encode_header);
+    RUN_TEST(test_graph7_decode_header);
+    RUN_TEST(test_graph7_encode_decode);
+
+    return UNITY_END();
 }
