@@ -8,6 +8,8 @@
 #define GRAPH7_VERSION ((GRAPH7_VERSION_MAJOR << 16) | (GRAPH7_VERSION_MINOR << 8) | GRAPH7_VERSION_BUILD)
 
 #include <stdint.h>
+#include <unistd.h>
+
 
 // MSVC haven't ssize_t so for it.
 #ifdef _MSC_VER
