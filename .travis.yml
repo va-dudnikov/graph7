@@ -1,0 +1,16 @@
+dist: trusty
+sudo: required
+language: c
+
+os:
+    - linux
+
+compiler:
+    - gcc
+
+script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - cmake --build .
+    - ctest --output-on-failure

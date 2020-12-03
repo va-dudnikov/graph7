@@ -1,5 +1,5 @@
 /*
- * graph7 encoding and decoding simple graph.
+ * graph7 encoding and decoding weighted graph.
  */
 
 #include <stdio.h>
@@ -13,22 +13,22 @@ int main()
 
     /* Encoding */
     {
-        uint8_t mat[] =
+        float mat[] =
         {
-            0, 1, 0, 0,
-            1, 0, 1, 1,
-            0, 1, 0, 0,
-            0, 1, 0, 0,
+            0.f,    3.14f,  2.71f,  0.f,
+            3.14f,  0.f,    0.f,    0.f,
+            2.71f,  0.f,    0.f,    0.f,
+            0.f,    0.f,    0.f,    0.f,
         };
 
         size_t order = 4;
 
         ssize_t retval = graph7_encode_from_matrix(
                     ibuff,
-                    mat,
+                    (uint8_t *)mat,
                     order,
                     GRAPH7_UNDIRECTED,
-                    GRAPH7_COMPACT_ENCODING // Replace it on 1 and check result
+                    sizeof(float)
                 );
 
         if(retval < 0)
@@ -54,11 +54,13 @@ int main()
 
         printf("Decoded graph:\n");
 
+        float *mat = (float *)obuff;
+
         for(int i = 0; i < order; i++)
         {
             for(int j = 0; j < order; j++)
             {
-                printf("%u ", obuff[i * order + j]);
+                printf("%.2f ", mat[i * order + j]);
             }
             printf("\n");
         }
