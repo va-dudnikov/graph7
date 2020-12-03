@@ -1,0 +1,26 @@
+image: Visual Studio 2015
+
+clone_folder: c:\projects\graph7
+shallow_clone: true
+
+matrix:
+    fast_finish: false
+
+platform:
+    - x64
+    - x86
+
+environment:
+    matrix:
+        - TOOLCHAIN: msvc10
+        - TOOLCHAIN: msvc12
+        - TOOLCHAIN: msvc14
+
+build_script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - cmake --build .
+
+test_script:
+    - ctest --output-on-failure
