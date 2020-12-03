@@ -16,6 +16,8 @@ set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE  1)
 add_library(${PROJECT_NAME}_shared SHARED $<TARGET_OBJECTS:objlib>)
 add_library(${PROJECT_NAME}_static STATIC $<TARGET_OBJECTS:objlib>)
 
+target_link_libraries(${PROJECT_NAME}_shared m)
+
 # Set same name for static and shared libraries
 set_target_properties(${PROJECT_NAME}_shared PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
