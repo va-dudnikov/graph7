@@ -8,14 +8,14 @@
 #define GRAPH7_VERSION ((GRAPH7_VERSION_MAJOR << 16) | (GRAPH7_VERSION_MINOR << 8) | GRAPH7_VERSION_BUILD)
 
 #include <stdint.h>
-#include <unistd.h>
-
 
 // MSVC haven't ssize_t so for it.
 #ifdef _MSC_VER
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
-#endif
+#else
+#include <unistd.h>
+#endif // _MSC_VER
 
 // graph7 graphs formats supported
 #define GRAPH7_UNDIRECTED       0   //!< Undirected graph
