@@ -22,8 +22,8 @@ environment:
 build_script:
     - mkdir build
     - cd build
-    - cmake ..
-    - cmake --build .
+    - cmake .. %CMAKE_CONFIGURE_FLAGS%
+    - cmake --build . %CMAKE_BUILD_FLAGS%
 
 test_script:
     - ctest -C %CONFIGURATION% --output-on-failure
