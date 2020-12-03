@@ -5,7 +5,7 @@ language: c
 os:
     - linux
 
-compiler
+compiler:
     - gcc
 
 script:
