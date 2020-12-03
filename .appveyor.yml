@@ -10,9 +10,6 @@ platform:
     - x64
     - x86
 
-configuration:
-    - Release
-
 environment:
     matrix:
         - TOOLCHAIN: msvc10
@@ -22,8 +19,8 @@ environment:
 build_script:
     - mkdir build
     - cd build
-    - cmake .. %CMAKE_CONFIGURE_FLAGS%
-    - cmake --build . %CMAKE_BUILD_FLAGS%
+    - cmake ..
+    - cmake --build . --config Release
 
 test_script:
-    - ctest -C %CONFIGURATION% --output-on-failure
+    - ctest -C Release --output-on-failure
