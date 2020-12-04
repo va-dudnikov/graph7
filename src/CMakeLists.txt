@@ -21,3 +21,6 @@ target_link_libraries(${PROJECT_NAME}_shared ${EXTERNAL_LIBS})
 # Set same name for static and shared libraries
 set_target_properties(${PROJECT_NAME}_shared PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+
+install(TARGETS ${PROJECT_NAME}_static DESTINATION ${CMAKE_BINARY_DIR}/install/lib)
+install(TARGETS ${PROJECT_NAME}_shared DESTINATION ${CMAKE_BINARY_DIR}/install/lib)

@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 include(CheckLibraryExists)
 
-project(graph7 VERSION 0.2.0 LANGUAGES C CXX)
+project(graph7 VERSION 0.2.0 LANGUAGES C)
 
 # We try to find sqrt in libm (in gcc and mingw), if we find it, we add a dependency.
 # In MSVC, sqrt appears to be somewhere else. For now, I ignore this problem, but
@@ -27,8 +27,6 @@ if (EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-install(TARGETS ${PROJECT_NAME}_static DESTINATION ${CMAKE_BINARY_DIR}/install/lib)
-install(TARGETS ${PROJECT_NAME}_shared DESTINATION ${CMAKE_BINARY_DIR}/install/lib)
 install(
     FILES
     include/graph7/defs.h

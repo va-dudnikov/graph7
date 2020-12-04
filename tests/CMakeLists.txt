@@ -7,7 +7,7 @@ list(
     APPEND
     TESTS_LIBS
     $<TARGET_OBJECTS:objlib>
-    test_objlib
+    $<TARGET_OBJECTS:test_objlib>
     ${EXTERNAL_LIBS}
 )
 
