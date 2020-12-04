@@ -3,6 +3,9 @@ include(CheckLibraryExists)
 
 project(graph7 VERSION 0.2.0 LANGUAGES C)
 
+# C99
+set(CMAKE_C_STANDARD 99)
+
 # We try to find sqrt in libm (in gcc and mingw), if we find it, we add a dependency.
 # In MSVC, sqrt appears to be somewhere else. For now, I ignore this problem, but
 # I will definitely figure it out!
